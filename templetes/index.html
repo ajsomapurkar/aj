@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ambit College Voice Assistant</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0b1120 0%, #19223a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 32px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 800px;
+            height: 85vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .chat-header {
+            padding: 24px 28px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .college-logo {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+
+        .college-info h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(to right, #a5b4fc, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+
+        }
+
+        .college-info p {
+            color: #9ca3af;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        .connection-status {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #4ade80;
+            font-size: 0.85rem;
+        }
+
+        .connection-status .dot {
+            width: 10px;
+            height: 10px;
+            background: #4ade80;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #4ade80;
+        }
+
+        /* Messages area */
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .message.user {
+            margin-left: auto;
+            flex-direction: row-reverse;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #2d3748;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .user .avatar {
+            background: linear-gradient(145deg, #2563eb, #7c3aed);
+        }
+
+        .bubble {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 14px 18px;
+            border-radius: 24px;
+            border-bottom-left-radius: 6px;
+            color: #e5e7eb;
+            line-height: 1.5;
+            font-size: 0.95rem;
+            word-break: break-word;
+        }
+
+        .user .bubble {
+            background: linear-gradient(145deg, #2563eb, #4f46e5);
+            color: white;
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 6px;
+        }
+
+        /* Typing indicator */
+        .typing .bubble {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 16px 24px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: #9ca3af;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        /* Input area */
+        .input-area {
+            padding: 24px 28px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .voice-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .mic-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #f43f5e, #e11d48);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            box-shadow: 0 8px 16px rgba(244, 63, 94, 0.3);
+        }
+
+        .mic-button.listening {
+            animation: pulse 1.5s infinite;
+            background: linear-gradient(145deg, #dc2626, #b91c1c);
+        }
+
+        .waveform {
+            flex: 1;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .waveform span {
+            width: 6px;
+            height: 20px;
+            background: #a5b4fc;
+            border-radius: 10px;
+            animation: wave 0.8s infinite ease-in-out;
+        }
+
+        .waveform span:nth-child(2) {
+            animation-delay: 0.1s;
+            height: 30px;
+        }
+
+        .waveform span:nth-child(3) {
+            animation-delay: 0.2s;
+            height: 40px;
+        }
+
+        .waveform span:nth-child(4) {
+            animation-delay: 0.3s;
+            height: 30px;
+        }
+
+        .waveform span:nth-child(5) {
+            animation-delay: 0.4s;
+            height: 20px;
+        }
+
+        .text-input-wrapper {
+            display: flex;
+            gap: 12px;
+        }
+
+        .text-input-wrapper input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 40px;
+            padding: 16px 24px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        .text-input-wrapper input:focus {
+            border-color: #6366f1;
+        }
+
+        .send-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #10b981, #059669);
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .quick-chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 40px;
+            padding: 10px 18px;
+            color: #d1d5db;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-chip:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #6366f1;
+            color: white;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(244, 63, 94, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(244, 63, 94, 0);
+            }
+        }
+
+        @keyframes typing {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        @keyframes wave {
+
+            0%,
+            100% {
+                height: 20px;
+            }
+
+            50% {
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="glass-card chat-container">
+        <!-- Header -->
+        <div class="chat-header">
+            <div class="college-logo">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div class="college-info">
+                <h1>Ambit College Assistant</h1>
+                <p>VTU Affiliated · Bharatesh Tech University</p>
+            </div>
+            <div class="connection-status">
+                <span class="dot"></span>
+                <span>Connected</span>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="messages-area" id="messagesArea">
+            <div class="message bot">
+                <div class="avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="bubble">
+                    👋 Welcome! I'm your college assistant. Ask me anything about admissions, fees, exams, departments,
+                    or facilities.
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area">
+            <!-- Voice control row -->
+            <div class="voice-control">
+                <button class="mic-button" id="micBtn">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <div class="waveform" id="waveform" style="display: none;">
+                    <span></span><span></span><span></span><span></span><span></span>
+                </div>
+            </div>
+
+            <!-- Text input row -->
+            <div class="text-input-wrapper">
+                <input type="text" id="textInput" placeholder="Type your question..." />
+                <button class="send-button" id="sendBtn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+
+            <!-- Quick reply chips -->
+            <div class="quick-replies">
+                <span class="quick-chip" onclick="askQuick('What is the admission process?')">📝 Admission</span>
+                <span class="quick-chip" onclick="askQuick('Fee structure?')">💰 Fees</span>
+                <span class="quick-chip" onclick="askQuick('VTU exam dates?')">📅 Exams</span>
+                <span class="quick-chip" onclick="askQuick('Contact CSE department')">📧 CSE</span>
+                <span class="quick-chip" onclick="askQuick('Library timings')">📚 Library</span>
+                <span class="quick-chip" onclick="askQuick('Hostel facilities')">🏠 Hostel</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== Configuration ==========
+        const API_URL = '';  // Leave empty to use same origin (works with Flask)
+        let isListening = false;
+        let recognition = null;
+        let synthesis = window.speechSynthesis;
+        let isTyping = false;
+
+        // DOM elements
+        const messagesArea = document.getElementById('messagesArea');
+        const micBtn = document.getElementById('micBtn');
+        const waveform = document.getElementById('waveform');
+        const textInput = document.getElementById('textInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const connectionDot = document.querySelector('.connection-status .dot');
+        const connectionText = document.querySelector('.connection-status span:last-child');
+
+        // ========== Initialize Speech Recognition ==========
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-IN';
+
+            recognition.onstart = () => {
+                isListening = true;
+                micBtn.classList.add('listening');
+                waveform.style.display = 'flex';
+                micBtn.innerHTML = '<i class="fas fa-stop"></i>';
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                micBtn.classList.remove('listening');
+                waveform.style.display = 'none';
+                micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                addMessage(transcript, 'user');
+                sendToBackend(transcript);
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech error:', event.error);
+                addMessage('System: Could not recognize speech. Please type.', 'bot');
+                micBtn.click(); // turn off
+            };
+        } else {
+            micBtn.disabled = true;
+            micBtn.style.opacity = 0.5;
+            connectionText.innerText = 'Voice not supported';
+            connectionDot.style.background = '#f59e0b';
+        }
+
+        // ========== Toggle Voice ==========
+        micBtn.addEventListener('click', () => {
+            if (!recognition) return;
+            if (isListening) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        });
+
+        // ========== Send Text ==========
+        sendBtn.addEventListener('click', sendText);
+        textInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendText();
+        });
+
+        function sendText() {
+            const text = textInput.value.trim();
+            if (!text) return;
+            addMessage(text, 'user');
+            textInput.value = '';
+            sendToBackend(text);
+        }
+
+        // ========== Quick Reply ==========
+        function askQuick(question) {
+            addMessage(question, 'user');
+            sendToBackend(question);
+        }
+        window.askQuick = askQuick; // make global for onclick
+
+        // ========== Add Message to UI ==========
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.innerHTML = sender === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.textContent = text;
+
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(bubble);
+            messagesArea.appendChild(messageDiv);
+
+            // Scroll to bottom
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        // ========== Show Typing Indicator ==========
+        function showTyping() {
+            if (isTyping) return;
+            isTyping = true;
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot typing';
+            typingDiv.id = 'typing-indicator';
+            typingDiv.innerHTML = `
+                <div class="avatar"><i class="fas fa-robot"></i></div>
+                <div class="bubble">
+                    <div class="typing-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+            `;
+            messagesArea.appendChild(typingDiv);
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        function hideTyping() {
+            const typing = document.getElementById('typing-indicator');
+            if (typing) typing.remove();
+            isTyping = false;
+        }
+
+        // ========== Send to Backend ==========
+        async function sendToBackend(message) {
+            showTyping();
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                const data = await response.json();
+                hideTyping();
+                if (data.success) {
+                    addMessage(data.response, 'bot');
+                    speakResponse(data.response);
+                } else {
+                    addMessage('System: Sorry, I encountered an error. Please try again.', 'bot');
+                }
+            } catch (error) {
+                hideTyping();
+                console.error('Network error:', error);
+                addMessage('System: Unable to reach server. Using offline responses.', 'bot');
+                // Optional offline fallback
+                const offlineResponses = {
+                    'admission': 'Admissions start in June. Required: SSLC, PUC, TC, caste certificate.',
+                    'fee': 'B.Tech: ₹85,000/year, BBA: ₹45,000, BCA: ₹40,000.',
+                    'exam': 'VTU exams: Odd sem Nov-Jan, Even sem Apr-Jun.',
+                };
+                let reply = "I can help with admissions, fees, exams, etc.";
+                const lower = message.toLowerCase();
+                for (let key in offlineResponses) {
+                    if (lower.includes(key)) {
+                        reply = offlineResponses[key];
+                        break;
+                    }
+                }
+                addMessage(reply, 'bot');
+                speakResponse(reply);
+            }
+        }
+
+        // ========== Text-to-Speech ==========
+        function speakResponse(text) {
+            if (synthesis.speaking) synthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-IN';
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+            synthesis.speak(utterance);
+        }
+
+        // ========== Health Check ==========
+        async function checkConnection() {
+            try {
+                const res = await fetch('/health');
+                if (res.ok) {
+                    connectionDot.style.background = '#4ade80';
+                    connectionText.innerText = 'Connected';
+                } else {
+                    throw new Error();
+                }
+            } catch {
+                connectionDot.style.background = '#f59e0b';
+                connectionText.innerText = 'Offline (Demo mode)';
+            }
+        }
+        checkConnection();
+    </script>
+</body>
+
+</html>
