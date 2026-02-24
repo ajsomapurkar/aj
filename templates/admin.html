@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>AmbitBot Admin Panel</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f4f7f6;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .log-item {
+            background: #fff3cd;
+            padding: 8px;
+            margin: 5px 0;
+            border-left: 5px solid #ffc107;
+            font-size: 14px;
+        }
+
+        .flash {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>AmbitBot Admin Panel</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <label>Admin Password</label>
+            <input type="password" name="password" placeholder="Enter password to save changes" required>
+
+            <label>New Question (Keyword)</label>
+            <input type="text" name="question" placeholder="e.g., bus timings" required>
+
+            <label>Bot Answer</label>
+            <textarea name="answer" placeholder="Enter the detailed answer here..." required></textarea>
+
+            <button type="submit">Update Bot Database</button>
+        </form>
+
+        <hr>
+
+        <h3>Student Questions Not Found (Logs)</h3>
+        <p><small>Check these to see what students are asking but not getting answers for:</small></p>
+        {% if logs %}
+        {% for log in logs %}
+        <div class="log-item">"{{ log.query }}"</div>
+        {% endfor %}
+        {% else %}
+        <p>No unanswered questions logged yet!</p>
+        {% endif %}
+    </div>
+
+</body>
+
+</html>

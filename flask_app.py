@@ -1,40 +1,65 @@
-from flask import Flask, request, jsonify, render_template
-from flask_cors import CORS
 import os
+from flask import Flask, render_template, request, jsonify, flash, redirect, url_for
 from chatbot import AmbitChatbot
+from dotenv import load_dotenv
 
-# Get the directory where this script is located
-basedir = os.path.abspath(os.path.dirname(__file__))
+load_dotenv()
 
-# FIX: Point to 'templates' (where your index.html actually is)
-# Instead of 'frontend', we use the standard 'templates' folder
-template_dir = os.path.join(basedir, 'templates')
+app = Flask(__name__)
+app.secret_key = "ambit_university_secret"  # Needed for flash messages
 
-app = Flask(__name__, template_folder=template_dir, static_folder=template_dir)
-CORS(app)
-
-chatbot = AmbitChatbot()
+# Initialize the Bot
+bot = AmbitChatbot()
 
 
 @app.route('/')
-def home():
-    # Flask will now look inside the 'templates' folder for this file
+def index():
     return render_template('index.html')
-
-
-@app.route('/chat', methods=['POST'])
-def chat():
-    data = request.json
-    message = data.get('message', '')
-    response = chatbot.get_response(message)
-    return jsonify({'success': True, 'response': response})
 
 
 @app.route('/health')
 def health():
-    return jsonify({'status': 'healthy'})
+    return jsonify({"status": "ok"}), 200
+
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    user_message = request.json.get('message', '')
+    if not user_message:
+        return jsonify({"response": "I didn't hear anything."})
+
+    bot_response = bot.get_response(user_message)
+    return jsonify({"success": True, "response": bot_response})
+
+
+@app.route('/admin', methods=['GET', 'POST'])
+def admin_panel():
+    if request.method == 'POST':
+        admin_pass = request.form.get('password')
+        question = request.form.get('question', '').lower().strip()
+        answer = request.form.get('answer', '').strip()
+
+        # Check password: AmbitAdmin2026
+        if admin_pass == "AmbitAdmin2026":
+            if question and answer:
+                # This creates/updates the 'knowledge_base' collection in Atlas
+                bot.db.knowledge_base.update_one(
+                    {"question": question},
+                    {"$set": {"answer": answer}},
+                    upsert=True
+                )
+                flash("The bot has been updated!", "success")
+            else:
+                flash("Please provide both a question and an answer.", "danger")
+        else:
+            flash("Incorrect Admin Password!", "danger")
+
+        return redirect(url_for('admin_panel'))
+
+    # Show unanswered questions in the admin panel
+    logs = list(bot.db.unanswered_logs.find().limit(10))
+    return render_template('admin.html', logs=logs)
 
 
 if __name__ == '__main__':
-    # host='0.0.0.0' is good for Render; debug=True is good for local testing
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(debug=True)
