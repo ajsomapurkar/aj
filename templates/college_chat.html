@@ -7,7 +7,6 @@
     <title>{{ college.college_name }} - AI Assistant</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* [KEEPING ALL YOUR EXISTING CSS STYLES THE SAME] */
         * {
             margin: 0;
             padding: 0;
@@ -48,6 +47,13 @@
             display: flex;
             align-items: center;
             gap: 16px;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
 
         .college-logo {
@@ -77,8 +83,29 @@
             margin-top: 4px;
         }
 
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #9ca3af;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #e5e7eb;
+        }
+
         .connection-status {
-            margin-left: auto;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -330,16 +357,21 @@
 <body>
     <div class="glass-card chat-container">
         <div class="chat-header">
-            <div class="college-logo">
-                <i class="fas fa-graduation-cap"></i>
+            <div class="header-left">
+                <div class="college-logo">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="college-info">
+                    <h1>{{ college.college_name }} Assistant</h1>
+                    <p>Official AI Campus Support</p>
+                </div>
             </div>
-            <div class="college-info">
-                <h1>{{ college.college_name }} Assistant</h1>
-                <p>Official AI Campus Support</p>
-            </div>
-            <div class="connection-status">
-                <span class="dot"></span>
-                <span id="connText">Connected</span>
+            <div class="header-actions">
+                <div class="connection-status">
+                    <span class="dot"></span>
+                    <span id="connText">Connected</span>
+                </div>
+                <a href="/logout" class="logout-btn">Logout</a>
             </div>
         </div>
 
@@ -378,8 +410,8 @@
     </div>
 
     <script>
-        // Use the current path to get the college_id (e.g., 'ambit' from '/ambit')
-        const COLLEGE_ID = window.location.pathname.split('/')[1] || 'default';
+        // Get college_id from URL
+        const COLLEGE_ID = window.location.pathname.split('/')[2];
 
         let isListening = false;
         let recognition = null;
@@ -469,11 +501,11 @@
             isTyping = false;
         }
 
-        // UPDATED: Sends to /chat/college_id
+        // Send to college-specific API endpoint (requires auth)
         async function sendToBackend(message) {
             showTyping();
             try {
-                const response = await fetch(`/chat/${COLLEGE_ID}`, {
+                const response = await fetch(`/college/${COLLEGE_ID}/chat/api`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message })
@@ -481,7 +513,12 @@
                 const data = await response.json();
                 hideTyping();
 
-                // Adjusted to match Flask response (data.response instead of data.success)
+                if (response.status === 401) {
+                    addMessage("Session expired. Please log in again.", 'bot');
+                    setTimeout(() => window.location.href = `/college/${COLLEGE_ID}/login`, 2000);
+                    return;
+                }
+
                 if (data.response) {
                     addMessage(data.response, 'bot');
                     speakResponse(data.response);

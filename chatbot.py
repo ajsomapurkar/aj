@@ -7,90 +7,73 @@ load_dotenv()
 
 class AmbitChatbot:
     def __init__(self):
-        # 1. Connect to MongoDB using the URI from your .env file
         uri = os.getenv("MONGO_URI")
         self.client = MongoClient(uri)
         self.db = self.client.ambit_db
 
-        # 2. Fetch the Master Data (Matches your screenshot: college_config)
-        try:
-            config = self.db.college_config.find_one({"type": "master_data"})
-            self.knowledge_base = config['data'] if config else {}
-        except Exception as e:
-            print(f"Error loading master data: {e}")
-            self.knowledge_base = {}
-
-    def get_response(self, query):
+    def get_response(self, query, college_id):
         query = query.lower().strip()
+        print(f"\n=== BOT QUERY ===\nCollege: {college_id}\nQuery: '{query}'")
 
-        # --- IMPROVED DYNAMIC SEARCH ---
+        # 1. Search Custom Q&A for THIS college
         try:
-            # We fetch ALL custom Q&A pairs from the database
-            all_custom_qa = list(self.db.knowledge_base.find())
-
-            # Debug line
-            print(f"DEBUG: Found {len(all_custom_qa)} custom Q&A pairs")
-
+            # We look for keywords belonging only to this specific college
+            all_custom_qa = list(self.db.knowledge_base.find(
+                {"college_id": college_id}))
+            print(f"Found {len(all_custom_qa)} Q&A pairs for {college_id}")
             for item in all_custom_qa:
-                # Validate that both 'question' and 'answer' keys exist
-                if 'question' not in item or 'answer' not in item:
-                    # Debug line
-                    print(f"DEBUG: Skipping invalid document: {item}")
-                    continue
-
-                # Check if the 'question' keyword exists inside the student's message
-                # Example: if item['question'] is "bus" and query is "what is the bus timing"
-                if item['question'].lower() in query:
-                    # Debug line
+                if item.get('question'):
+                    # Try exact match first, then substring
+                    item_question = item['question'].lower().strip()
                     print(
-                        f"DEBUG: Found match for '{item['question']}' in '{query}'")
-                    return item['answer']
+                        f"  Checking: '{item_question}' (len={len(item_question)})")
+                    if item_question == query or item_question in query or query in item_question:
+                        print(f"  ✓ MATCH! Returning: '{item['answer']}'")
+                        return item['answer']
+            print(f"  No match found in custom Q&A")
         except Exception as e:
-            print(f"❌ Database search error: {e}")
+            print(f"Database error: {e}")
 
-        # --- ORIGINAL LOGIC (Fallback) ---
-        if not self.knowledge_base:
-            return "I'm having trouble connecting to my database."
+        # 2. Search Master Data for THIS college
+        try:
+            config = self.db.college_config.find_one(
+                {"type": "master_data", "college_id": college_id})
+            kb = config['data'] if config else {}
+        except:
+            kb = {}
 
+        # 3. Fallback Logic (using the specific college's data)
         if 'admission' in query:
-            return self._format_admissions()
+            return self._format_admissions(kb)
         elif 'fee' in query:
-            return self._format_fees()
-        elif 'exam' in query:
-            return self._format_exams()
+            return self._format_fees(kb)
         elif 'contact' in query:
-            return self._format_contacts()
+            return self._format_contacts(kb)
         else:
-            self.db.unanswered_logs.insert_one({"query": query})
-            return self._general_help()
+            # Log unanswered questions so the specific college admin can see them
+            self.db.unanswered_logs.insert_one({
+                "query": query,
+                "college_id": college_id
+            })
+            return "I'm not sure about that. Try asking about admissions, fees, or contact info."
 
-    def _format_admissions(self):
+    def _format_admissions(self, kb):
         try:
-            data = self.knowledge_base['admissions']['undergraduate']
-            return f"Admissions: {', '.join(data['courses'])}. Fees: B.Tech {data['fees']['btech']}."
-        except KeyError:
-            return "Admission details are currently being updated."
+            data = kb['admissions']['undergraduate']
+            return f"Admissions open for: {', '.join(data['courses'])}. B.Tech Fee: {data['fees']['btech']}."
+        except:
+            return "Admission details are currently being updated for this campus."
 
-    def _format_fees(self):
+    def _format_fees(self, kb):
         try:
-            fees = self.knowledge_base['admissions']['undergraduate']['fees']
-            return f"Fees: B.Tech {fees['btech']}, BCA {fees['bca']} (per year)."
-        except KeyError:
-            return "Fee information is currently unavailable."
+            fees = kb['admissions']['undergraduate']['fees']
+            return f"Annual Fees: B.Tech: {fees['btech']}, BCA: {fees['bca']}."
+        except:
+            return "Fee details are not available for this college yet."
 
-    def _format_exams(self):
+    def _format_contacts(self, kb):
         try:
-            exams = self.knowledge_base['examinations']
-            return f"VTU Schedule: {exams['vtu_schedule']['odd_sem']}."
-        except KeyError:
-            return "Exam schedules are not yet posted."
-
-    def _format_contacts(self):
-        try:
-            info = self.knowledge_base['college_info']
-            return f"Phone: {info['phone']}, Email: {info['email']}, Address: {info['address']}."
-        except KeyError:
-            return "Contact information not found."
-
-    def _general_help(self):
-        return "I can help with admissions, fees, exams, and hostel info. Please ask specifically!"
+            info = kb['college_info']
+            return f"Contact us at {info['phone']} or email {info['email']}."
+        except:
+            return "Contact information is currently unavailable."

@@ -3,111 +3,175 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>AmbitBot Admin Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ college.college_name }} | Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        :root {
+            --primary: #6366f1;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+        }
+
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #f4f7f6;
-            padding: 40px;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 2rem;
+            margin: 0;
         }
 
         .container {
-            max-width: 600px;
-            margin: auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--card);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #94a3b8;
         }
 
         input,
         textarea {
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: white;
             box-sizing: border-box;
         }
 
         button {
-            width: 100%;
-            padding: 12px;
-            background: #28a745;
+            background: var(--primary);
             color: white;
             border: none;
-            border-radius: 5px;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
             cursor: pointer;
-            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background: #065f46;
+            color: #34d399;
+        }
+
+        .alert-danger {
+            background: #7f1d1d;
+            color: #f87171;
         }
 
         .log-item {
-            background: #fff3cd;
-            padding: 8px;
-            margin: 5px 0;
-            border-left: 5px solid #ffc107;
-            font-size: 14px;
+            background: #334155;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
         }
 
-        .flash {
-            padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .success {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .danger {
-            background: #f8d7da;
-            color: #721c24;
+        .badge {
+            background: #475569;
+            padding: 0.2rem 0.6rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
         }
     </style>
 </head>
 
 <body>
-
     <div class="container">
-        <h2>AmbitBot Admin Panel</h2>
+        <div class="header">
+            <div>
+                <h1>{{ college.college_name }} Admin</h1>
+                <p>Manage your chatbot knowledge base</p>
+            </div>
+            <a href="/{{ college.college_id }}" style="color: var(--primary); text-decoration: none;">View Bot →</a>
+        </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, message in messages %}
-        <div class="flash {{ category }}">{{ message }}</div>
+        <div class="alert alert-{{ category }}">{{ message }}</div>
         {% endfor %}
         {% endif %}
         {% endwith %}
 
-        <form method="POST">
-            <label>Admin Password</label>
-            <input type="password" name="password" placeholder="Enter password to save changes" required>
+        <div class="card">
+            <h2>Add Knowledge</h2>
+            <form method="POST">
+                <div class="form-group">
+                    <label>Admin Password</label>
+                    <input type="password" name="password" required placeholder="Enter college admin password">
+                </div>
+                <div class="form-group">
+                    <label>User Question (Keyword)</label>
+                    <input type="text" name="question" required placeholder="e.g. When is the annual fest?">
+                </div>
+                <div class="form-group">
+                    <label>Bot Answer</label>
+                    <textarea name="answer" rows="3" required
+                        placeholder="e.g. The annual fest 'Ambit-2026' is scheduled for March 15th."></textarea>
+                </div>
+                <button type="submit"><i class="fas fa-save"></i> Save to Knowledge Base</button>
+            </form>
+        </div>
 
-            <label>New Question (Keyword)</label>
-            <input type="text" name="question" placeholder="e.g., bus timings" required>
-
-            <label>Bot Answer</label>
-            <textarea name="answer" placeholder="Enter the detailed answer here..." required></textarea>
-
-            <button type="submit">Update Bot Database</button>
-        </form>
-
-        <hr>
-
-        <h3>Student Questions Not Found (Logs)</h3>
-        <p><small>Check these to see what students are asking but not getting answers for:</small></p>
-        {% if logs %}
-        {% for log in logs %}
-        <div class="log-item">"{{ log.query }}"</div>
-        {% endfor %}
-        {% else %}
-        <p>No unanswered questions logged yet!</p>
-        {% endif %}
+        <div class="card">
+            <h2>Recent Unanswered Questions</h2>
+            <p style="color: #94a3b8; font-size: 0.9rem;">Questions students asked that I couldn't answer:</p>
+            <div id="logs">
+                {% if logs %}
+                {% for log in logs %}
+                <div class="log-item">
+                    <span>"{{ log.query }}"</span>
+                    <span class="badge">Unresolved</span>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p>No unanswered logs. Your bot is doing great!</p>
+                {% endif %}
+            </div>
+        </div>
     </div>
-
 </body>
 
 </html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Register</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 24px
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Register Student</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert {{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        <label>Name</label><br>
+        <input type="text" name="name"><br>
+        <label>Email</label><br>
+        <input type="email" name="email" required><br>
+        <label>Password</label><br>
+        <input type="password" name="password" required><br>
+        <label>College</label><br>
+        <select name="college_id" required>
+            {% for c in colleges %}
+            <option value="{{ c.college_id }}">{{ c.college_name }}</option>
+            {% endfor %}
+        </select><br><br>
+        <button type="submit">Register</button>
+    </form>
+
+    <p>Already have an account? <a href="/login">Login</a></p>
+</body>
+
+</html>

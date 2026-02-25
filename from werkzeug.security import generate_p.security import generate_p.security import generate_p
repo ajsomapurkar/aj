@@ -1,0 +1,12 @@
+from werkzeug.security import generate_password_hash
+from chatbot import AmbitChatbot
+bot = AmbitChatbot()
+pw = generate_password_hash("studentpass")
+bot.db.users.insert_one({
+  'name':'Alice',
+  'email':'alice@amity.edu',
+  'password_hash':pw,
+  'college_id':'amity',
+  'role':'student'
+})
+print('created alice@amity.edu / studentpass')

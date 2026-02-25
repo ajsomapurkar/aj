@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS Campus Bot - Select Your College</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            color: #333;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        select:hover {
+            border-color: #667eea;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .super-admin-link {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .super-admin-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .super-admin-link a:hover {
+            text-decoration: underline;
+        }
+
+        .colleges-list {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .colleges-list strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .college-item {
+            padding: 5px 0;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🏫 Campus Bot</h1>
+        <p class="subtitle">AI Assistant for Your College</p>
+
+        <form method="POST" action="javascript:void(0);" onsubmit="selectCollege(event)">
+            <div class="form-group">
+                <label for="college">Select Your College:</label>
+                <select id="college" name="college_id" required>
+                    <option value="">-- Choose Your College --</option>
+                    {% for college in colleges %}
+                    <option value="{{ college.college_id }}">{{ college.college_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit">Continue</button>
+        </form>
+
+        <div class="colleges-list">
+            <strong>Available Colleges:</strong>
+            {% if colleges %}
+            {% for college in colleges %}
+            <div class="college-item">✓ {{ college.college_name }}</div>
+            {% endfor %}
+            {% else %}
+            <div class="college-item">No colleges registered yet.</div>
+            {% endif %}
+        </div>
+
+        <div class="super-admin-link">
+            <a href="/super-admin">Manage Colleges? → Super Admin</a>
+        </div>
+    </div>
+
+    <script>
+        function selectCollege(e) {
+            const collegeId = document.getElementById('college').value;
+            if (collegeId) {
+                window.location.href = `/college/${collegeId}/login`;
+            }
+        }
+    </script>
+</body>
+
+</html>

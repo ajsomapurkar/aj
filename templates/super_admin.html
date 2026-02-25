@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>SaaS Control Plane | Super Admin</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #0f172a;
+            color: white;
+            padding: 40px;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: white;
+        }
+
+        button {
+            background: #10b981;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .badge {
+            background: #6366f1;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>SaaS Multi-College Management</h1>
+
+    <div class="card">
+        <h2>Register New College</h2>
+        <form method="POST">
+            <input type="password" name="master_pass" placeholder="Master Admin Password" required>
+            <hr>
+            <input type="text" name="college_id" placeholder="College ID (e.g., ambit)" required>
+            <input type="text" name="college_name" placeholder="Display Name (e.g., Ambit College)" required>
+            <input type="text" name="college_pass" placeholder="Set Admin Password for them" required>
+            <button type="submit">Create College Instance</button>
+        </form>
+    </div>
+
+    <div class="card" style="max-width: 800px;">
+        <h2>Active Colleges</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Links</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for col in colleges %}
+                <tr>
+                    <td><code>{{ col.college_id }}</code></td>
+                    <td>{{ col.college_name }}</td>
+                    <td><span class="badge">Active</span></td>
+                    <td>
+                        <a href="/{{ col.college_id }}" style="color: #10b981;">Bot</a> |
+                        <a href="/{{ col.college_id }}/admin" style="color: #6366f1;">Admin</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>
