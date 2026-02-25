@@ -142,6 +142,7 @@
         {% endwith %}
 
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="form-group">
                 <label for="password">Admin Password:</label>
                 <input type="password" id="password" name="password" placeholder="College Admin Password" required

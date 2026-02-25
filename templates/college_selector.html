@@ -145,17 +145,17 @@
         <h1>🏫 Campus Bot</h1>
         <p class="subtitle">AI Assistant for Your College</p>
 
-        <form method="POST" action="javascript:void(0);" onsubmit="selectCollege(event)">
+        <form id="collegeForm" method="POST" action="javascript:void(0);" onsubmit="selectCollege(event)">
             <div class="form-group">
                 <label for="college">Select Your College:</label>
-                <select id="college" name="college_id" required>
+                <select id="college" name="college_id" required onchange="updateButtonState()">
                     <option value="">-- Choose Your College --</option>
                     {% for college in colleges %}
                     <option value="{{ college.college_id }}">{{ college.college_name }}</option>
                     {% endfor %}
                 </select>
             </div>
-            <button type="submit">Continue</button>
+            <button id="continueBtn" type="submit" disabled>Continue</button>
         </form>
 
         <div class="colleges-list">
@@ -175,11 +175,29 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            updateButtonState();
+            // allow pressing Enter to submit when a selection exists
+            const form = document.getElementById('collegeForm');
+            form.addEventListener('submit', selectCollege);
+        });
+
+        function updateButtonState() {
+            const collegeSelect = document.getElementById('college');
+            const btn = document.getElementById('continueBtn');
+            btn.disabled = !collegeSelect.value;
+        }
+
         function selectCollege(e) {
+            if (e && typeof e.preventDefault === 'function') e.preventDefault();
             const collegeId = document.getElementById('college').value;
-            if (collegeId) {
-                window.location.href = `/college/${collegeId}/login`;
+            if (!collegeId) {
+                const select = document.getElementById('college');
+                select.focus();
+                return;
             }
+            // navigate to the college login page
+            window.location.href = `/college/${collegeId}/login`;
         }
     </script>
 </body>

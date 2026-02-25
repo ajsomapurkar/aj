@@ -69,9 +69,11 @@
         <h2>Register New College</h2>
         <form method="POST">
             <input type="password" name="master_pass" placeholder="Master Admin Password" required>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <hr>
             <input type="text" name="college_id" placeholder="College ID (e.g., ambit)" required>
             <input type="text" name="college_name" placeholder="Display Name (e.g., Ambit College)" required>
+            <input type="email" name="college_email" placeholder="Admin email (notifications)" required>
             <input type="text" name="college_pass" placeholder="Set Admin Password for them" required>
             <button type="submit">Create College Instance</button>
         </form>
@@ -92,7 +94,19 @@
                 {% for col in colleges %}
                 <tr>
                     <td><code>{{ col.college_id }}</code></td>
-                    <td>{{ col.college_name }}</td>
+                    <td>
+                        {{ col.college_name }}
+                        <form method="POST" action="/super-admin/edit/{{ col.college_id }}" style="margin-top:6px;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="password" name="master_pass" placeholder="Master Password" required
+                                style="width:30%; display:inline-block">
+                            <input type="email" name="college_email" placeholder="Admin email"
+                                style="width:33%; display:inline-block">
+                            <input type="text" name="college_pass" placeholder="New admin pass"
+                                style="width:25%; display:inline-block">
+                            <button type="submit" style="width:100%; margin-top:6px;">Save</button>
+                        </form>
+                    </td>
                     <td><span class="badge">Active</span></td>
                     <td>
                         <a href="/{{ col.college_id }}" style="color: #10b981;">Bot</a> |
