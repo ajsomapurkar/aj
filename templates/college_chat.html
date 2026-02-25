@@ -260,7 +260,8 @@
 
         .messages-area {
             flex: 1;
-            overflow-y: auto;
+            overflow-y: scroll;
+            overflow-x: hidden;
             padding: 32px;
             display: flex;
             flex-direction: column;
@@ -269,20 +270,22 @@
         }
 
         .messages-area::-webkit-scrollbar {
-            width: 6px;
+            width: 10px;
         }
 
         .messages-area::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .messages-area::-webkit-scrollbar-thumb {
-            background: rgba(139, 92, 246, 0.3);
+            background: rgba(139, 92, 246, 0.05);
             border-radius: 10px;
         }
 
-        .messages-area::-webkit-scrollbar-thumb:hover {
+        .messages-area::-webkit-scrollbar-thumb {
             background: rgba(139, 92, 246, 0.5);
+            border-radius: 10px;
+            border: 2px solid rgba(139, 92, 246, 0.05);
+        }
+
+        .messages-area::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 92, 246, 0.7);
         }
 
         .message {
@@ -656,7 +659,10 @@
                 <div class="bubble">${text}</div>
             `;
             messagesArea.appendChild(messageDiv);
-            messagesArea.scrollTop = messagesArea.scrollHeight;
+            // Scroll to bottom with a small delay to ensure render
+            setTimeout(() => {
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+            }, 0);
         }
 
         function showTyping() {
@@ -670,7 +676,10 @@
                 <div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>
             `;
             messagesArea.appendChild(typingDiv);
-            messagesArea.scrollTop = messagesArea.scrollHeight;
+            // Scroll to bottom
+            setTimeout(() => {
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+            }, 0);
         }
 
         function hideTyping() {
