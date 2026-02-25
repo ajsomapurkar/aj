@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SaaS Control Plane | Super Admin</title>
     <style>
         body {
@@ -59,17 +60,40 @@
             border-radius: 4px;
             font-size: 12px;
         }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .success {
+            background: #065f46;
+        }
+
+        .danger {
+            background: #991b1b;
+        }
     </style>
 </head>
 
 <body>
     <h1>SaaS Multi-College Management</h1>
 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert {{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
     <div class="card">
         <h2>Register New College</h2>
         <form method="POST">
-            <input type="password" name="master_pass" placeholder="Master Admin Password" required>
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <input type="password" name="master_pass" placeholder="Master Admin Password" required>
             <hr>
             <input type="text" name="college_id" placeholder="College ID (e.g., ambit)" required>
             <input type="text" name="college_name" placeholder="Display Name (e.g., Ambit College)" required>
@@ -98,6 +122,7 @@
                         {{ col.college_name }}
                         <form method="POST" action="/super-admin/edit/{{ col.college_id }}" style="margin-top:6px;">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
                             <input type="password" name="master_pass" placeholder="Master Password" required
                                 style="width:30%; display:inline-block">
                             <input type="email" name="college_email" placeholder="Admin email"
@@ -109,8 +134,8 @@
                     </td>
                     <td><span class="badge">Active</span></td>
                     <td>
-                        <a href="/{{ col.college_id }}" style="color: #10b981;">Bot</a> |
-                        <a href="/{{ col.college_id }}/admin" style="color: #6366f1;">Admin</a>
+                        <a href="/college/{{ col.college_id }}/chat" style="color: #10b981;">Bot</a> |
+                        <a href="/college/{{ col.college_id }}/admin" style="color: #6366f1;">Admin</a>
                     </td>
                 </tr>
                 {% endfor %}

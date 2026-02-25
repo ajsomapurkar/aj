@@ -172,6 +172,10 @@
             font-style: italic;
         }
 
+        .btn-reject {
+            background: #e74c3c !important;
+        }
+
         @media (max-width: 768px) {
             .row {
                 grid-template-columns: 1fr;
@@ -206,10 +210,10 @@
         {% endwith %}
 
         <div class="row">
-            <!-- Add Q&A Panel -->
             <div class="panel">
                 <h2>📝 Add Question & Answer</h2>
                 <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="form-group">
                         <label for="question">Question:</label>
                         <input type="text" id="question" name="question" placeholder="e.g., What are admission fees?"
@@ -226,7 +230,6 @@
                 </form>
             </div>
 
-            <!-- Saved Q&A Collection -->
             <div class="panel">
                 <h2>📚 Saved Q&A ({{ qa_pairs|length }})</h2>
                 {% if qa_pairs %}
@@ -234,52 +237,16 @@
                 <div class="log-item">
                     <div class="question">Q: {{ qa.question }}</div>
                     <div style="color: #555; margin-bottom: 5px;">A: {{ qa.answer }}</div>
-                    <div class="meta">✓ Saved</div>
+                    <div class="meta">✓ Database Active</div>
                 </div>
                 {% endfor %}
                 {% else %}
-                <div class="empty-state">
-                    No saved Q&A yet. Add some above!
-                </div>
+                <div class="empty-state">No saved Q&A yet. Add some above!</div>
                 {% endif %}
             </div>
         </div>
 
         <div class="row">
-            <!-- Unanswered Questions Log -->
-            <div class="panel">
-                <h2>❓ Unanswered Questions</h2>
-                {% if logs %}
-                {% for log in logs %}
-                <div class="log-item">
-                    <div class="question">"{{ log.query }}"</div>
-                    <div class="meta">👤 Unanswered</div>
-                </div>
-                {% endfor %}
-                {% else %}
-                <div class="empty-state">
-                    ✓ All questions are answered!
-                </div>
-                {% endif %}
-            </div>
-
-            <!-- Dashboard Info -->
-            <div class="panel">
-                <h2>📊 Dashboard Info</h2>
-                <p style="color: #666; line-height: 1.6;">
-                    <strong>College:</strong> {{ college.college_name }}<br>
-                    <strong>College ID:</strong> <code
-                        style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">{{ college.college_id }}</code><br>
-                    <strong>Status:</strong> {{ college.status | default('Active') }}<br>
-                    <strong>Total Q&A Saved:</strong> {{ qa_pairs|length }}<br>
-                    <br>
-                    Use the form to add Q&A. The saved collection shows all Q&A your students may ask about.
-                </p>
-            </div>
-        </div>
-
-        <div class="row">
-            <!-- Pending Users -->
             <div class="panel">
                 <h2>🕒 Pending Student Registrations</h2>
                 {% if pending_users %}
@@ -287,20 +254,35 @@
                 <div class="log-item">
                     <div class="question">{{ u.name }} — {{ u.email }}</div>
                     <div style="margin-top:8px; display:flex; gap:8px;">
-                        <form method="POST"
-                            action="/college/{{ college.college_id }}/admin/pending/approve/{{ u._id }}">
+                        <form method="POST" action="/approve/{{ college.college_id }}/{{ u._id }}">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit">Approve</button>
+                            <button type="submit" style="width: auto; padding: 8px 15px;">Approve</button>
                         </form>
-                        <form method="POST" action="/college/{{ college.college_id }}/admin/pending/reject/{{ u._id }}">
+
+                        <form method="POST" action="/reject/{{ college.college_id }}/{{ u._id }}">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" style="background:#e74c3c;">Reject</button>
+                            <button type="submit" class="btn-reject"
+                                style="width: auto; padding: 8px 15px;">Reject</button>
                         </form>
                     </div>
                 </div>
                 {% endfor %}
                 {% else %}
                 <div class="empty-state">No pending registrations.</div>
+                {% endif %}
+            </div>
+
+            <div class="panel">
+                <h2>❓ Unanswered Questions</h2>
+                {% if logs %}
+                {% for log in logs %}
+                <div class="log-item">
+                    <div class="question">"{{ log.query }}"</div>
+                    <div class="meta">👤 Needs attention</div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="empty-state">✓ All student queries are handled!</div>
                 {% endif %}
             </div>
         </div>
