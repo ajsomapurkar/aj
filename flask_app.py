@@ -140,9 +140,58 @@ def reject_user(college_id, user_id):
 @csrf.exempt
 def chat_api(college_id):
     data = request.json
+    # We use .get() to prevent errors if 'message' is missing
     query = data.get('message', '').strip().lower()
+
+    # --- SMALL TALK FILTER ---
+    small_talk_responses = {
+        "hi": "Hello! Welcome to the campus assistant. How can I help you today?",
+        "hello": "Hi there! I'm here to answer your college-related questions.",
+        "hey": "Hey! Need help with admissions, fees, or campus info? Just ask!",
+        "thanks": "You're very welcome!",
+        "thank you": "Happy to help! Feel free to ask more questions."
+    }
+
+    # If the user's word is in our dictionary, return the answer immediately
+    if query in small_talk_responses:
+        return jsonify({'response': small_talk_responses[query]})
+    # --- END SMALL TALK FILTER ---
+
+    # If it's NOT small talk, then we run your AI/PDF search logic
     response = bot.get_response(query, college_id)
     return jsonify({'response': response})
+
+
+@app.route('/college/<college_id>/history')
+def college_history(college_id):
+    # 1. Fetch college info for the sidebar and page headers
+    college = bot.db.colleges.find_one({'college_id': college_id})
+
+    if not college:
+        return "College not found", 404
+
+    # 2. Fetch unanswered logs specifically for this college
+    # This pulls from the 'unanswered_logs' collection in your MongoDB
+    history = list(bot.db.unanswered_logs.find({"college_id": college_id}))
+
+    # 3. Render the history.html with the data we found
+    return render_template('history.html', college=college, history=history)
+
+
+@app.route('/college/<college_id>/faq')
+def college_faq(college_id):
+    # 1. Fetch the college details for the sidebar and header
+    college = bot.db.colleges.find_one({'college_id': college_id})
+
+    if not college:
+        return "College not found", 404
+
+    # 2. Fetch all Q&A pairs for this specific college
+    # We filter by college_id so students only see their own college's info
+    faqs = list(bot.db.knowledge_base.find({"college_id": college_id}))
+
+    # 3. Render the page with the data
+    return render_template('faq.html', college=college, faqs=faqs)
 
 
 if __name__ == '__main__':
