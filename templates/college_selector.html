@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SaaS Campus Bot - Select Your College</title>
     <style>
+        /* Keeping your original purple gradient styling */
         * {
             margin: 0;
             padding: 0;
@@ -65,11 +66,6 @@
             color: #333;
             background: white;
             cursor: pointer;
-            transition: border-color 0.3s;
-        }
-
-        select:hover {
-            border-color: #667eea;
         }
 
         button {
@@ -82,23 +78,12 @@
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-bottom: 10px;
-        }
-
-        button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            transition: transform 0.2s;
         }
 
         button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
-        }
-
-        .admin-btn {
-            background: #2d3436;
-            margin-top: 5px;
         }
 
         .super-admin-link {
@@ -112,7 +97,6 @@
             color: #667eea;
             text-decoration: none;
             font-weight: 600;
-            font-size: 0.9rem;
         }
 
         .colleges-list {
@@ -121,7 +105,6 @@
             padding: 15px;
             margin-top: 20px;
             font-size: 0.9rem;
-            color: #666;
         }
     </style>
 </head>
@@ -131,18 +114,18 @@
         <h1>🏫 Campus Bot</h1>
         <p class="subtitle">AI Assistant for Your College</p>
 
-        <div class="form-group">
-            <label for="college">Select Your College:</label>
-            <select id="college" name="college_id" required onchange="updateButtonState()">
-                <option value="">-- Choose Your College --</option>
-                {% for college in colleges %}
-                <option value="{{ college.college_id }}">{{ college.college_name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <button id="continueBtn" onclick="goToPage('chat')" disabled>Start Chatting</button>
-        <button id="adminBtn" class="admin-btn" onclick="goToPage('admin')" disabled>College Admin Panel</button>
+        <form id="collegeForm" onsubmit="selectCollege(event)">
+            <div class="form-group">
+                <label for="college">Select Your College:</label>
+                <select id="college" name="college_id" required onchange="updateButtonState()">
+                    <option value="">-- Choose Your College --</option>
+                    {% for college in colleges %}
+                    <option value="{{ college.college_id }}">{{ college.college_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button id="continueBtn" type="submit" disabled>Continue</button>
+        </form>
 
         <div class="colleges-list">
             <strong>Available Colleges:</strong>
@@ -163,25 +146,16 @@
     <script>
         function updateButtonState() {
             const collegeSelect = document.getElementById('college');
-            const chatBtn = document.getElementById('continueBtn');
-            const adminBtn = document.getElementById('adminBtn');
-
-            const isSelected = collegeSelect.value !== "";
-            chatBtn.disabled = !isSelected;
-            adminBtn.disabled = !isSelected;
+            const btn = document.getElementById('continueBtn');
+            btn.disabled = !collegeSelect.value;
         }
 
-        function goToPage(type) {
+        function selectCollege(e) {
+            e.preventDefault();
             const collegeId = document.getElementById('college').value;
-            if (!collegeId) return;
-
-            if (type === 'admin') {
-                // Redirects to /college/amity/admin
-                window.location.href = `/college/${collegeId}/admin`;
-            } else {
-                // Redirects to your main chat/registration page
-                // Update this URL if your chat route is different (e.g., /college/amity/register)
-                window.location.href = `/college/${collegeId}/chat`;
+            if (collegeId) {
+                // Fixed redirect to match your desired URL structure
+                window.location.href = `/college/${collegeId}/login`;
             }
         }
     </script>
