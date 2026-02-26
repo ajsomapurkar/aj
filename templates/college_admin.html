@@ -5,7 +5,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - {{ college.college_name }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* [KEEP YOUR EXISTING STYLES HERE] */
         * {
             margin: 0;
             padding: 0;
@@ -13,7 +15,7 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background: #f5f5f5;
             padding: 20px;
         }
@@ -27,11 +29,6 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .navbar h1 {
-            font-size: 1.5em;
         }
 
         .navbar a {
@@ -40,11 +37,6 @@
             padding: 8px 16px;
             border-radius: 5px;
             text-decoration: none;
-            transition: all 0.2s;
-        }
-
-        .navbar a:hover {
-            background: rgba(255, 255, 255, 0.3);
         }
 
         .container {
@@ -69,7 +61,6 @@
         .panel h2 {
             color: #333;
             margin-bottom: 20px;
-            font-size: 1.3em;
             border-bottom: 2px solid #667eea;
             padding-bottom: 10px;
         }
@@ -78,34 +69,12 @@
             margin-bottom: 15px;
         }
 
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
         input,
         textarea {
             width: 100%;
             padding: 10px;
             border: 2px solid #e0e0e0;
             border-radius: 5px;
-            font-size: 0.95rem;
-            font-family: inherit;
-            transition: border-color 0.2s;
-        }
-
-        input:focus,
-        textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 80px;
         }
 
         button {
@@ -115,25 +84,25 @@
             color: white;
             border: none;
             border-radius: 5px;
-            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.2s;
+            font-weight: bold;
         }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        .log-item {
+            background: #f9f9f9;
+            padding: 12px;
+            border-left: 4px solid #667eea;
+            margin-bottom: 10px;
         }
 
-        .alerts {
-            margin-bottom: 20px;
+        .btn-reject {
+            background: #e74c3c !important;
         }
 
         .alert {
-            padding: 12px 15px;
+            padding: 15px;
+            margin-bottom: 20px;
             border-radius: 5px;
-            font-size: 0.9rem;
-            margin-bottom: 10px;
         }
 
         .alert.success {
@@ -145,145 +114,97 @@
             background: #f8d7da;
             color: #721c24;
         }
-
-        .log-item {
-            background: #f9f9f9;
-            padding: 12px;
-            border-left: 4px solid #667eea;
-            margin-bottom: 10px;
-            border-radius: 3px;
-        }
-
-        .log-item .question {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .log-item .meta {
-            font-size: 0.85rem;
-            color: #999;
-        }
-
-        .empty-state {
-            text-align: center;
-            color: #999;
-            padding: 30px 0;
-            font-style: italic;
-        }
-
-        .btn-reject {
-            background: #e74c3c !important;
-        }
-
-        @media (max-width: 768px) {
-            .row {
-                grid-template-columns: 1fr;
-            }
-
-            .navbar {
-                flex-direction: column;
-                gap: 10px;
-                text-align: center;
-            }
-        }
     </style>
 </head>
 
 <body>
     <div class="navbar">
-        <h1>🎓 Admin Dashboard</h1>
+        <h1>🎓 {{ college.college_name }} Admin</h1>
         <a href="/">← Home</a>
     </div>
 
     <div class="container">
-        <h1 style="color: #333; margin-bottom: 20px;">{{ college.college_name }} Management</h1>
-
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-        <div class="alerts">
-            {% for category, message in messages %}
-            <div class="alert {{ category }}">{{ message }}</div>
-            {% endfor %}
-        </div>
+        {% for category, message in messages %}
+        <div class="alert {{ category }}">{{ message }}</div>
+        {% endfor %}
         {% endif %}
         {% endwith %}
 
         <div class="row">
             <div class="panel">
-                <h2>📝 Add Question & Answer</h2>
+                <h2>📝 Add Manual Q&A</h2>
                 <form method="POST">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="form-group">
-                        <label for="question">Question:</label>
-                        <input type="text" id="question" name="question" placeholder="e.g., What are admission fees?"
-                            required>
+                        <label>Question:</label>
+                        <input type="text" name="question" required>
                     </div>
-
                     <div class="form-group">
-                        <label for="answer">Answer:</label>
-                        <textarea id="answer" name="answer" placeholder="Provide a detailed answer..."
-                            required></textarea>
+                        <label>Answer:</label>
+                        <textarea name="answer" required></textarea>
                     </div>
-
-                    <button type="submit">Save Q&A</button>
+                    <button type="submit">Save to Database</button>
                 </form>
             </div>
 
             <div class="panel">
-                <h2>📚 Saved Q&A ({{ qa_pairs|length }})</h2>
-                {% if qa_pairs %}
-                {% for qa in qa_pairs %}
-                <div class="log-item">
-                    <div class="question">Q: {{ qa.question }}</div>
-                    <div style="color: #555; margin-bottom: 5px;">A: {{ qa.answer }}</div>
-                    <div class="meta">✓ Database Active</div>
+                <h2>📚 Saved Knowledge ({{ qa_pairs|length }})</h2>
+                <div style="max-height: 300px; overflow-y: auto;">
+                    {% for qa in qa_pairs %}
+                    <div class="log-item">
+                        <strong>{{ qa.question }}</strong>
+                        <p style="font-size: 0.9rem; color: #555;">{{ qa.answer[:100] }}...</p>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
-                {% else %}
-                <div class="empty-state">No saved Q&A yet. Add some above!</div>
-                {% endif %}
             </div>
         </div>
 
         <div class="row">
             <div class="panel">
-                <h2>🕒 Pending Student Registrations</h2>
-                {% if pending_users %}
+                <h2>🕒 Pending Students</h2>
                 {% for u in pending_users %}
                 <div class="log-item">
-                    <div class="question">{{ u.name }} — {{ u.email }}</div>
-                    <div style="margin-top:8px; display:flex; gap:8px;">
+                    <div>{{ u.name }} ({{ u.email }})</div>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
                         <form method="POST" action="/approve/{{ college.college_id }}/{{ u._id }}">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" style="width: auto; padding: 8px 15px;">Approve</button>
+                            <button type="submit" style="width: auto;">Approve</button>
                         </form>
-
                         <form method="POST" action="/reject/{{ college.college_id }}/{{ u._id }}">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" class="btn-reject"
-                                style="width: auto; padding: 8px 15px;">Reject</button>
+                            <button type="submit" class="btn-reject" style="width: auto;">Reject</button>
                         </form>
                     </div>
                 </div>
                 {% endfor %}
-                {% else %}
-                <div class="empty-state">No pending registrations.</div>
-                {% endif %}
             </div>
 
             <div class="panel">
-                <h2>❓ Unanswered Questions</h2>
-                {% if logs %}
+                <h2>❓ Unanswered Logs</h2>
                 {% for log in logs %}
                 <div class="log-item">
-                    <div class="question">"{{ log.query }}"</div>
-                    <div class="meta">👤 Needs attention</div>
+                    "{{ log.query }}" <br>
+                    <small>{{ log.timestamp }}</small>
                 </div>
                 {% endfor %}
-                {% else %}
-                <div class="empty-state">✓ All student queries are handled!</div>
-                {% endif %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="panel" style="grid-column: span 2;">
+                <h2>📁 Bulk Train AI (PDF Upload)</h2>
+                <form action="/college/{{ college.college_id }}/upload" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="form-group">
+                        <label>Upload Document (PDF only):</label>
+                        <input type="file" name="pdf_file" accept=".pdf" required
+                            style="padding: 20px; border: 2px dashed #667eea;">
+                    </div>
+                    <button type="submit" style="background: #2d3436;">Upload & Extract Knowledge</button>
+                </form>
             </div>
         </div>
     </div>
