@@ -72,12 +72,6 @@
             border-color: #667eea;
         }
 
-        select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
         button {
             width: 100%;
             padding: 12px;
@@ -89,15 +83,22 @@
             font-weight: 600;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 10px;
         }
 
-        button:hover {
+        button:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
 
-        button:active {
-            transform: translateY(0);
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .admin-btn {
+            background: #2d3436;
+            margin-top: 5px;
         }
 
         .super-admin-link {
@@ -114,10 +115,6 @@
             font-size: 0.9rem;
         }
 
-        .super-admin-link a:hover {
-            text-decoration: underline;
-        }
-
         .colleges-list {
             background: #f5f5f5;
             border-radius: 8px;
@@ -125,17 +122,6 @@
             margin-top: 20px;
             font-size: 0.9rem;
             color: #666;
-        }
-
-        .colleges-list strong {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-        }
-
-        .college-item {
-            padding: 5px 0;
-            color: #555;
         }
     </style>
 </head>
@@ -145,18 +131,18 @@
         <h1>🏫 Campus Bot</h1>
         <p class="subtitle">AI Assistant for Your College</p>
 
-        <form id="collegeForm" method="POST" action="javascript:void(0);" onsubmit="selectCollege(event)">
-            <div class="form-group">
-                <label for="college">Select Your College:</label>
-                <select id="college" name="college_id" required onchange="updateButtonState()">
-                    <option value="">-- Choose Your College --</option>
-                    {% for college in colleges %}
-                    <option value="{{ college.college_id }}">{{ college.college_name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <button id="continueBtn" type="submit" disabled>Continue</button>
-        </form>
+        <div class="form-group">
+            <label for="college">Select Your College:</label>
+            <select id="college" name="college_id" required onchange="updateButtonState()">
+                <option value="">-- Choose Your College --</option>
+                {% for college in colleges %}
+                <option value="{{ college.college_id }}">{{ college.college_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button id="continueBtn" onclick="goToPage('chat')" disabled>Start Chatting</button>
+        <button id="adminBtn" class="admin-btn" onclick="goToPage('admin')" disabled>College Admin Panel</button>
 
         <div class="colleges-list">
             <strong>Available Colleges:</strong>
@@ -175,29 +161,28 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            updateButtonState();
-            // allow pressing Enter to submit when a selection exists
-            const form = document.getElementById('collegeForm');
-            form.addEventListener('submit', selectCollege);
-        });
-
         function updateButtonState() {
             const collegeSelect = document.getElementById('college');
-            const btn = document.getElementById('continueBtn');
-            btn.disabled = !collegeSelect.value;
+            const chatBtn = document.getElementById('continueBtn');
+            const adminBtn = document.getElementById('adminBtn');
+
+            const isSelected = collegeSelect.value !== "";
+            chatBtn.disabled = !isSelected;
+            adminBtn.disabled = !isSelected;
         }
 
-        function selectCollege(e) {
-            if (e && typeof e.preventDefault === 'function') e.preventDefault();
+        function goToPage(type) {
             const collegeId = document.getElementById('college').value;
-            if (!collegeId) {
-                const select = document.getElementById('college');
-                select.focus();
-                return;
+            if (!collegeId) return;
+
+            if (type === 'admin') {
+                // Redirects to /college/amity/admin
+                window.location.href = `/college/${collegeId}/admin`;
+            } else {
+                // Redirects to your main chat/registration page
+                // Update this URL if your chat route is different (e.g., /college/amity/register)
+                window.location.href = `/college/${collegeId}/chat`;
             }
-            // navigate to the college login page
-            window.location.href = `/college/${collegeId}/login`;
         }
     </script>
 </body>
