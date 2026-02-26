@@ -7,542 +7,34 @@
     <title>{{ college.college_name }} - AI Assistant</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', sans-serif;
-        }
+        /* ... KEEP ALL YOUR EXISTING CSS HERE ... (It's perfect) */
 
-        body {
-            background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 50%, #0a0d12 100%);
-            min-height: 100vh;
-            display: flex;
-            color: #e5e7eb;
-            overflow: hidden;
-        }
-
-        /* ===== SIDEBAR ===== */
-        .sidebar {
-            width: 280px;
-            background: rgba(10, 13, 18, 0.6);
-            backdrop-filter: blur(20px);
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            overflow-y: auto;
-        }
-
-        .sidebar-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .sidebar-logo {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #8b5cf6, #ec4899);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            color: white;
-        }
-
-        .sidebar-title h3 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            background: linear-gradient(to right, #a5b4fc, #ec4899);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .sidebar-title p {
-            font-size: 0.75rem;
-            color: #9ca3af;
-            margin-top: 2px;
-        }
-
-        .nav-section {
-            margin-bottom: 25px;
-        }
-
-        .nav-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            color: #6b7280;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 14px;
-            border-radius: 10px;
-            cursor: pointer;
-            color: #d1d5db;
-            font-size: 0.95rem;
-            transition: all 0.3s;
-            margin-bottom: 8px;
-            text-decoration: none;
-        }
-
-        .nav-item:hover {
-            background: rgba(139, 92, 246, 0.1);
-            color: #a5b4fc;
-            border-left: 3px solid #8b5cf6;
-            padding-left: 11px;
-        }
-
-        .nav-item.active {
-            background: rgba(139, 92, 246, 0.2);
-            color: #a5b4fc;
-            border-left: 3px solid #8b5cf6;
-            padding-left: 11px;
-        }
-
-        .nav-item i {
-            width: 20px;
-            text-align: center;
-        }
-
-        .sidebar-footer {
-            margin-top: auto;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .user-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(139, 92, 246, 0.2);
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 12px;
-        }
-
-        .user-avatar {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, #8b5cf6, #ec4899);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 16px;
-            margin-bottom: 10px;
-        }
-
-        .user-name {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #e5e7eb;
-        }
-
-        .user-status {
-            font-size: 0.8rem;
-            color: #9ca3af;
-            margin-top: 4px;
-        }
-
-        /* ===== MAIN CONTENT ===== */
-        .main-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chat-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chat-header {
-            padding: 20px 32px;
-            background: rgba(255, 255, 255, 0.02);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            justify-content: space-between;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            flex: 1;
-        }
-
-        .college-logo {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, #8b5cf6, #ec4899);
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            color: white;
-        }
-
-        .college-info h1 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            background: linear-gradient(to right, #a5b4fc, #fbcfe8);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .college-info p {
-            color: #9ca3af;
-            font-size: 0.85rem;
-            margin-top: 4px;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .connection-status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #10b981;
-            font-size: 0.85rem;
-            background: rgba(16, 185, 129, 0.1);
-            padding: 8px 12px;
-            border-radius: 20px;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-
-        .connection-status .dot {
-            width: 8px;
-            height: 8px;
-            background: #10b981;
-            border-radius: 50%;
-            box-shadow: 0 0 8px #10b981;
-        }
-
-        .logout-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #d1d5db;
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.3s;
-            font-weight: 500;
-        }
-
-        .logout-btn:hover {
-            background: rgba(239, 68, 68, 0.15);
-            border-color: rgba(239, 68, 68, 0.3);
-            color: #fca5a5;
-        }
-
+        /* Small fix for scrolling to ensure it stays at bottom */
         .messages-area {
-            flex: 1;
-            overflow-y: scroll;
-            overflow-x: hidden;
-            padding: 32px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
             scroll-behavior: smooth;
-        }
-
-        .messages-area::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        .messages-area::-webkit-scrollbar-track {
-            background: rgba(139, 92, 246, 0.05);
-            border-radius: 10px;
-        }
-
-        .messages-area::-webkit-scrollbar-thumb {
-            background: rgba(139, 92, 246, 0.5);
-            border-radius: 10px;
-            border: 2px solid rgba(139, 92, 246, 0.05);
-        }
-
-        .messages-area::-webkit-scrollbar-thumb:hover {
-            background: rgba(139, 92, 246, 0.7);
-        }
-
-        .message {
-            display: flex;
-            align-items: flex-end;
-            gap: 12px;
-            max-width: 70%;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .message.user {
-            margin-left: auto;
-            flex-direction: row-reverse;
-        }
-
-        .avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: #2d3748;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            color: white;
-            flex-shrink: 0;
-        }
-
-        .user .avatar {
-            background: linear-gradient(135deg, #8b5cf6, #ec4899);
-        }
-
-        .bubble {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 14px 18px;
-            border-radius: 18px;
-            border-bottom-left-radius: 6px;
-            color: #e5e7eb;
-            line-height: 1.6;
-            font-size: 0.95rem;
-            word-break: break-word;
-        }
-
-        .user .bubble {
-            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
-            border: 1px solid rgba(139, 92, 246, 0.4);
-            color: white;
-            border-bottom-left-radius: 18px;
-            border-bottom-right-radius: 6px;
-        }
-
-        .typing-dots {
-            display: flex;
-            gap: 4px;
-        }
-
-        .typing-dots span {
-            width: 8px;
-            height: 8px;
-            background: #9ca3af;
-            border-radius: 50%;
-            animation: typing 1.4s infinite;
-        }
-
-        .typing-dots span:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .typing-dots span:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        .input-area {
-            padding: 24px 32px;
-            background: rgba(255, 255, 255, 0.02);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .text-input-wrapper {
-            display: flex;
-            gap: 12px;
-        }
-
-        .text-input-wrapper input {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 30px;
-            padding: 14px 22px;
-            color: white;
-            font-size: 0.95rem;
-            outline: none;
-            transition: all 0.3s;
-        }
-
-        .text-input-wrapper input::placeholder {
-            color: #6b7280;
-        }
-
-        .text-input-wrapper input:focus {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(139, 92, 246, 0.5);
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-        }
-
-        .send-button {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #8b5cf6, #ec4899);
-            border: none;
-            color: white;
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
-        }
-
-        .send-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 28px rgba(139, 92, 246, 0.4);
-        }
-
-        .send-button:active {
-            transform: translateY(0);
-        }
-
-        .quick-replies {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .quick-chip {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            border-radius: 20px;
-            padding: 10px 16px;
-            color: #d1d5db;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .quick-chip:hover {
-            background: rgba(139, 92, 246, 0.2);
-            border-color: rgba(139, 92, 246, 0.5);
-            color: #a5b4fc;
-        }
-
-        /* ===== ANIMATIONS ===== */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes typing {
-
-            0%,
-            60%,
-            100% {
-                transform: translateY(0);
-                opacity: 0.4;
-            }
-
-            30% {
-                transform: translateY(-10px);
-                opacity: 1;
-            }
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 1024px) {
-            .sidebar {
-                width: 240px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                width: 100%;
-                height: auto;
-                border-right: none;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-                padding: 16px;
-            }
-
-            .nav-section {
-                display: inline-flex;
-                gap: 8px;
-                margin-right: 16px;
-                margin-bottom: 0;
-            }
-
-            .chat-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .header-right {
-                width: 100%;
-                justify-content: space-between;
-            }
-
-            .message {
-                max-width: 85%;
-            }
-
-            .messages-area {
-                padding: 16px;
-            }
-
-            .input-area {
-                padding: 16px;
-            }
         }
     </style>
 </head>
 
 <body>
-    <!-- SIDEBAR -->
     <div class="sidebar">
         <div class="sidebar-header">
             <div class="sidebar-logo">
                 <i class="fas fa-sparkles"></i>
             </div>
             <div class="sidebar-title">
-                <h3>AMBIT Bot</h3>
+                <h3>{{ college.college_name }} Bot</h3>
                 <p>Campus AI Assistant</p>
             </div>
         </div>
 
         <div class="nav-section">
             <div class="nav-label">Main</div>
-            <a href="#" class="nav-item active">
+            <a href="/college/{{ college.college_id }}/chat" class="nav-item active">
                 <i class="fas fa-comments"></i>
                 <span>Chat</span>
             </a>
-            <a href="#" class="nav-item">
+            <a href="/college/{{ college.college_id }}/history" class="nav-item">
                 <i class="fas fa-history"></i>
                 <span>History</span>
             </a>
@@ -550,7 +42,7 @@
 
         <div class="nav-section">
             <div class="nav-label">Resources</div>
-            <a href="#" class="nav-item">
+            <a href="/college/{{ college.college_id }}/faq" class="nav-item">
                 <i class="fas fa-book"></i>
                 <span>FAQ</span>
             </a>
@@ -566,14 +58,13 @@
                 <div class="user-name">Session Active</div>
                 <div class="user-status">Ready to assist</div>
             </div>
-            <a href="/logout" class="nav-item" style="color: #ef5350;">
+            <a href="/" class="nav-item" style="color: #ef5350;">
                 <i class="fas fa-sign-out-alt"></i>
-                <span>Logout</span>
+                <span>Exit Portal</span>
             </a>
         </div>
     </div>
 
-    <!-- MAIN CHAT AREA -->
     <div class="main-container">
         <div class="chat-container">
             <div class="chat-header">
@@ -607,8 +98,8 @@
 
             <div class="input-area">
                 <div class="text-input-wrapper">
-                    <input type="text" id="textInput"
-                        placeholder="Ask me anything about {{ college.college_name }}..." />
+                    <input type="text" id="textInput" placeholder="Ask me anything about {{ college.college_name }}..."
+                        autocomplete="off" />
                     <button class="send-button" id="sendBtn">
                         <i class="fas fa-arrow-right"></i>
                     </button>
@@ -626,94 +117,9 @@
     </div>
 
     <script>
-        // Get college_id from URL
+        // Keep your existing Script, it's very clean and works well!
         const COLLEGE_ID = window.location.pathname.split('/')[2];
-
-        let isTyping = false;
-
-        const messagesArea = document.getElementById('messagesArea');
-        const textInput = document.getElementById('textInput');
-        const sendBtn = document.getElementById('sendBtn');
-
-        sendBtn.addEventListener('click', sendText);
-        textInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendText(); });
-
-        function sendText() {
-            const text = textInput.value.trim();
-            if (!text) return;
-            addMessage(text, 'user');
-            textInput.value = '';
-            sendToBackend(text);
-        }
-
-        function askQuick(question) {
-            addMessage(question, 'user');
-            sendToBackend(question);
-        }
-
-        function addMessage(text, sender) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}`;
-            messageDiv.innerHTML = `
-                <div class="avatar"><i class="fas fa-${sender === 'user' ? 'user' : 'robot'}"></i></div>
-                <div class="bubble">${text}</div>
-            `;
-            messagesArea.appendChild(messageDiv);
-            // Scroll to bottom with a small delay to ensure render
-            setTimeout(() => {
-                messagesArea.scrollTop = messagesArea.scrollHeight;
-            }, 0);
-        }
-
-        function showTyping() {
-            if (isTyping) return;
-            isTyping = true;
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'message bot typing';
-            typingDiv.id = 'typing-indicator';
-            typingDiv.innerHTML = `
-                <div class="avatar"><i class="fas fa-robot"></i></div>
-                <div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>
-            `;
-            messagesArea.appendChild(typingDiv);
-            // Scroll to bottom
-            setTimeout(() => {
-                messagesArea.scrollTop = messagesArea.scrollHeight;
-            }, 0);
-        }
-
-        function hideTyping() {
-            const typing = document.getElementById('typing-indicator');
-            if (typing) typing.remove();
-            isTyping = false;
-        }
-
-        // Send to college-specific API endpoint (requires auth)
-        async function sendToBackend(message) {
-            showTyping();
-            try {
-                const response = await fetch(`/college/${COLLEGE_ID}/chat/api`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message })
-                });
-                const data = await response.json();
-                hideTyping();
-
-                if (response.status === 401) {
-                    addMessage("Session expired. Please log in again.", 'bot');
-                    setTimeout(() => window.location.href = `/college/${COLLEGE_ID}/login`, 2000);
-                    return;
-                }
-
-                if (data.response) {
-                    addMessage(data.response, 'bot');
-                }
-            } catch (error) {
-                hideTyping();
-                addMessage("I'm having trouble connecting. Please try again later.", 'bot');
-            }
-        }
+        // ... (remaining script)
     </script>
 </body>
 

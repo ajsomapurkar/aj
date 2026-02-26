@@ -5,8 +5,6 @@ from datetime import datetime
 from bson.objectid import ObjectId
 from chatbot import AmbitChatbot
 from flask_wtf import CSRFProtect
-from tasks import send_email_task
-from mailer import send_email as send_email_sync
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -15,6 +13,12 @@ app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET", "dev_secret_123")
 bot = AmbitChatbot()
 csrf = CSRFProtect(app)
+
+# --- MIDDLEWARE: GET COLLEGE CONTEXT ---
+
+
+def get_college_context(college_id):
+    return bot.db.colleges.find_one({'college_id': college_id})
 
 # --- 1. PUBLIC ROUTES ---
 
@@ -49,7 +53,7 @@ def register():
 
 @app.route('/college/<college_id>/login', methods=['GET', 'POST'])
 def college_login(college_id):
-    college = bot.db.colleges.find_one({'college_id': college_id})
+    college = get_college_context(college_id)
     if request.method == 'POST':
         email = request.form.get('email', '').lower().strip()
         user = bot.db.users.find_one(
@@ -66,8 +70,29 @@ def college_login(college_id):
 def college_chat(college_id):
     if session.get('college_id') != college_id:
         return redirect(url_for('college_login', college_id=college_id))
-    college = bot.db.colleges.find_one({'college_id': college_id})
+    college = get_college_context(college_id)
     return render_template('college_chat.html', college=college)
+
+# NEW: FAQ ROUTE
+
+
+@app.route('/college/<college_id>/faq')
+def college_faq(college_id):
+    college = get_college_context(college_id)
+    # Pull the Q&A pairs from the knowledge_base collection we used in chatbot.py
+    faqs = list(bot.db.knowledge_base.find({"college_id": college_id}))
+    return render_template('faq.html', college=college, faqs=faqs)
+
+# NEW: HISTORY ROUTE (Unanswered Questions)
+
+
+@app.route('/college/<college_id>/history')
+def college_history(college_id):
+    college = get_college_context(college_id)
+    # Shows the logs of what students have asked
+    history = list(bot.db.unanswered_logs.find(
+        {"college_id": college_id}).sort("timestamp", -1))
+    return render_template('history.html', college=college, history=history)
 
 
 @app.route('/college/<college_id>/chat/api', methods=['POST'])
@@ -79,12 +104,12 @@ def chat_api(college_id):
     response = bot.get_response(query, college_id)
     return jsonify({'response': response})
 
-# --- 3. ADMIN PANEL & APPROVAL (The Fix) ---
+# --- 3. ADMIN PANEL & APPROVAL ---
 
 
 @app.route('/college/<college_id>/admin', methods=['GET', 'POST'])
 def college_admin_panel(college_id):
-    college = bot.db.colleges.find_one({"college_id": college_id})
+    college = get_college_context(college_id)
     auth_key = f"admin_auth_{college_id}"
 
     if request.method == 'POST' and request.form.get('password'):
@@ -98,39 +123,16 @@ def college_admin_panel(college_id):
         {"college_id": college_id, "pending": True}))
     return render_template('college_admin.html', college=college, pending_users=pending_users)
 
-# THIS IS THE ROUTE THAT WAS MISSING OR MISSPELLED
-
 
 @app.route('/approve/<college_id>/<user_id>', methods=['POST'])
 def approve_user(college_id, user_id):
-    # Verify the admin is actually logged in for this college
     if session.get(f"admin_auth_{college_id}"):
-        bot.db.users.update_one(
-            {'_id': ObjectId(user_id)},
-            {'$set': {'pending': False}}
-        )
+        bot.db.users.update_one({'_id': ObjectId(user_id)}, {
+                                '$set': {'pending': False}})
         flash('User approved successfully!', 'success')
     else:
         flash('Unauthorized action', 'danger')
-
     return redirect(url_for('college_admin_panel', college_id=college_id))
-
-# --- 4. SUPER ADMIN ---
-
-
-@app.route('/super-admin', methods=['GET', 'POST'])
-def super_admin():
-    if request.method == 'POST':
-        if request.form.get('master_pass') == os.getenv("MASTER_PASS", "SuperOwner2026"):
-            c_id = request.form.get('college_id', '').lower().strip()
-            bot.db.colleges.update_one({"college_id": c_id}, {"$set": {
-                "college_name": request.form.get('college_name'),
-                "admin_password": request.form.get('college_pass'),
-                "admin_email": request.form.get('college_email', '').lower().strip()
-            }}, upsert=True)
-            flash("College created!", "success")
-    colleges = list(bot.db.colleges.find())
-    return render_template('super_admin.html', colleges=colleges)
 
 
 if __name__ == '__main__':
