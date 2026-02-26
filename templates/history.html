@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ college.college_name }} - Query History</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Reusing your high-end dark theme */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 50%, #0a0d12 100%);
+            min-height: 100vh;
+            display: flex;
+            color: #e5e7eb;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 280px;
+            background: rgba(10, 13, 18, 0.6);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            color: #d1d5db;
+            text-decoration: none;
+            margin-bottom: 8px;
+            transition: 0.3s;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(139, 92, 246, 0.2);
+            color: #a5b4fc;
+            border-left: 3px solid #8b5cf6;
+        }
+
+        /* CONTENT */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            background: linear-gradient(to right, #a5b4fc, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 800px;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 15px 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .query-text {
+            color: #e5e7eb;
+            font-weight: 500;
+        }
+
+        .status-tag {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: #6b7280;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="nav-section">
+            <a href="/college/{{ college.college_id }}/chat" class="nav-item">
+                <i class="fas fa-comments"></i>
+                <span>Back to Chat</span>
+            </a>
+            <a href="/college/{{ college.college_id }}/faq" class="nav-item">
+                <i class="fas fa-book"></i>
+                <span>FAQ</span>
+            </a>
+            <a href="/college/{{ college.college_id }}/history" class="nav-item active">
+                <i class="fas fa-history"></i>
+                <span>History</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Unanswered Queries</h1>
+            <p>Questions our AI is currently learning about for {{ college.college_name }}</p>
+        </div>
+
+        <div class="history-list">
+            {% if history %}
+            {% for item in history %}
+            <div class="history-item">
+                <span class="query-text">"{{ item.query }}"</span>
+                <span class="status-tag">Pending Admin Response</span>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-clock-rotate-left fa-3x" style="margin-bottom: 15px;"></i>
+                <p>No unanswered history yet. The bot is doing great!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+
+</html>
