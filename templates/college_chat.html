@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ college.college_name }} - AI Assistant</title>
@@ -227,6 +228,82 @@
             </div>
         </div>
     </div>
+    <script>
+        const messagesArea = document.getElementById('messagesArea');
+        const textInput = document.getElementById('textInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        // Function to add a message bubble to the UI
+        function addBubble(text, isUser = false) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+
+            // Style user bubbles differently
+            if (isUser) {
+                bubble.style.alignSelf = 'flex-end';
+                bubble.style.background = 'linear-gradient(135deg, #8b5cf6, #ec4899)';
+                bubble.style.color = 'white';
+                bubble.style.border = 'none';
+            } else {
+                bubble.style.alignSelf = 'flex-start';
+            }
+
+            bubble.innerHTML = text;
+            messagesArea.appendChild(bubble);
+            messagesArea.scrollTop = messagesArea.scrollHeight; // Auto-scroll
+            return bubble;
+        }
+
+        // Main function to send message to Flask
+        async function handleSendMessage() {
+            const message = textInput.value.trim();
+            if (!message) return;
+
+            // 1. Clear input and show user message
+            textInput.value = '';
+            addBubble(message, true);
+
+            // 2. Show "typing" placeholder
+            const typingBubble = addBubble("<i>Thinking...</i>");
+
+            try {
+                const response = await fetch(`/college/{{ college.college_id }}/chat/api`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                const data = await response.json();
+
+                // 3. Update placeholder with real response
+                typingBubble.innerHTML = data.response;
+
+            } catch (error) {
+                console.error("Error:", error);
+                typingBubble.innerHTML = "❌ Connection lost. Please try again.";
+            }
+        }
+
+        // Listen for Button Click
+        sendBtn.addEventListener('click', handleSendMessage);
+
+        // Listen for Enter Key
+        textInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSendMessage();
+        });
+
+        // Handle Quick Reply Chips
+        document.querySelectorAll('.quick-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                textInput.value = chip.textContent.replace(/[^\w\s]/gi, '').trim();
+                handleSendMessage();
+            });
+        });
+    </script>
 </body>
 
 </html>

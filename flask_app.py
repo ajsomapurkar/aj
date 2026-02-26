@@ -26,7 +26,7 @@ if not os.path.exists(UPLOAD_FOLDER):
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# --- ROUTES ---
+# --- 1. LANDING PAGE ---
 
 
 @app.route('/')
@@ -34,12 +34,73 @@ def root():
     colleges = list(bot.db.colleges.find())
     return render_template('college_selector.html', colleges=colleges)
 
+# --- 2. STUDENT LOGIN (FIXES YOUR 404) ---
+
+
+@app.route('/college/<college_id>/login', methods=['GET', 'POST'])
+def college_login_gate(college_id):
+    college = bot.db.colleges.find_one({'college_id': college_id})
+    if not college:
+        return "College not found", 404
+
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        user = bot.db.users.find_one(
+            {"email": email, "college_id": college_id})
+
+        if user and user.get('password') == password:
+            if user.get('pending'):
+                flash("Wait for admin approval!", "warning")
+            else:
+                session['user_id'] = str(user['_id'])
+                return redirect(url_for('college_chat', college_id=college_id))
+        else:
+            flash("Invalid credentials", "danger")
+
+    return render_template('login.html', college=college)
+
+# --- 3. STUDENT REGISTRATION ---
+
+
+@app.route('/college/<college_id>/register', methods=['GET', 'POST'])
+def college_register(college_id):
+    # Fetch all colleges for the dropdown
+    all_colleges = list(bot.db.colleges.find())
+
+    # Fetch the specific college the user is visiting
+    # We name it 'current_college' to fix the UndefinedError
+    current_college = bot.db.colleges.find_one({'college_id': college_id})
+
+    if request.method == 'POST':
+        bot.db.users.insert_one({
+            "name": request.form.get('name'),
+            "email": request.form.get('email'),
+            "password": request.form.get('password'),
+            "college_id": request.form.get('college_id'),
+            "pending": True,
+            "created_at": datetime.utcnow()
+        })
+        flash("Registration sent! Wait for approval.", "success")
+        return redirect(url_for('college_login_gate', college_id=college_id))
+
+    # CRITICAL: We pass current_college here
+    return render_template('register.html', current_college=current_college, colleges=all_colleges)
+
+# --- 4. CHAT INTERFACE ---
+
+
+@app.route('/college/<college_id>/chat')
+def college_chat(college_id):
+    college = bot.db.colleges.find_one({'college_id': college_id})
+    return render_template('college_chat.html', college=college)
+
+# --- 5. ADMIN PANEL ---
+
 
 @app.route('/college/<college_id>/admin', methods=['GET', 'POST'])
 def college_admin_panel(college_id):
     college = bot.db.colleges.find_one({'college_id': college_id})
-
-    # Handle Manual Q&A Entry
     if request.method == 'POST' and request.form.get('question'):
         bot.db.knowledge_base.insert_one({
             "college_id": college_id,
@@ -50,42 +111,12 @@ def college_admin_panel(college_id):
         })
         flash('Q&A saved!', 'success')
 
-    # Dashboard Data
     qa_pairs = list(bot.db.knowledge_base.find({"college_id": college_id}))
     pending_users = list(bot.db.users.find(
         {"college_id": college_id, "pending": True}))
-    logs = list(bot.db.unanswered_logs.find({"college_id": college_id}))
+    return render_template('college_admin.html', college=college, qa_pairs=qa_pairs, pending_users=pending_users)
 
-    return render_template('college_admin.html', college=college, qa_pairs=qa_pairs,
-                           pending_users=pending_users, logs=logs)
-
-
-@app.route('/college/<college_id>/upload', methods=['POST'])
-def upload_pdf(college_id):
-    if 'pdf_file' not in request.files:
-        flash('No file part', 'danger')
-        return redirect(request.url)
-
-    file = request.files['pdf_file']
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
-
-        # Process PDF
-        reader = PdfReader(filepath)
-        text = "\n".join([page.extract_text() for page in reader.pages])
-
-        bot.db.knowledge_base.insert_one({
-            "college_id": college_id,
-            "question": f"Context from {filename}",
-            "answer": text,
-            "type": "pdf_content",
-            "source": filename,
-            "created_at": datetime.utcnow()
-        })
-        flash(f'Successfully trained AI with {filename}!', 'success')
-    return redirect(url_for('college_admin_panel', college_id=college_id))
+# --- 6. ADMIN ACTIONS (APPROVE/REJECT) ---
 
 
 @app.route('/approve/<college_id>/<user_id>', methods=['POST'])
@@ -102,17 +133,14 @@ def reject_user(college_id, user_id):
     flash('Registration rejected.', 'danger')
     return redirect(url_for('college_admin_panel', college_id=college_id))
 
+# --- 7. CHAT API ---
+
 
 @app.route('/college/<college_id>/chat/api', methods=['POST'])
 @csrf.exempt
 def chat_api(college_id):
     data = request.json
     query = data.get('message', '').strip().lower()
-
-    # Small Talk Filter
-    if query in ['hi', 'hello', 'hey', 'hlo']:
-        return jsonify({'response': "Hi there! How can I help you today?"})
-
     response = bot.get_response(query, college_id)
     return jsonify({'response': response})
 
