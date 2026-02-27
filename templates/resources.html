@@ -78,6 +78,33 @@
             margin-bottom: 20px;
             display: inline-block;
         }
+
+        @media (max-width: 600px) {
+
+            /* 1. Shrink the Sidebar */
+            .sidebar {
+                width: 60px !important;
+                padding: 10px 5px !important;
+            }
+
+            /* 2. Hide the text labels so only icons show */
+            .sidebar span,
+            .sidebar h2,
+            .sidebar p {
+                display: none;
+            }
+
+            /* 3. Adjust the main content margin to match the smaller sidebar */
+            .main-content {
+                margin-left: 60px !important;
+                padding: 15px !important;
+            }
+
+            /* 4. Shrink the overlapping header text */
+            header h1 {
+                font-size: 1.1rem !important;
+            }
+        }
     </style>
 </head>
 
