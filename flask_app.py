@@ -54,11 +54,20 @@ def college_login_gate(college_id):
                 flash("Wait for admin approval!", "warning")
             else:
                 session['user_id'] = str(user['_id'])
+                session['user_name'] = user.get('name', 'Student')
                 return redirect(url_for('college_chat', college_id=college_id))
         else:
             flash("Invalid credentials", "danger")
 
     return render_template('login.html', college=college)
+
+
+@app.route('/logout')
+def logout():
+    session.clear()  # This wipes the session so the student is officially logged out
+    flash("Logged out successfully", "success")
+    # Change 'root' to 'index' if your home page function is named index
+    return redirect(url_for('root'))
 
 # --- 3. STUDENT REGISTRATION ---
 

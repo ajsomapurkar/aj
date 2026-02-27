@@ -207,6 +207,112 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-bottom-left-radius: 4px !important;
         }
+
+        /* Layout the header to have space between left and right */
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            /* Pushes items to opposite sides */
+            align-items: center;
+            padding: 15px 25px;
+            background: rgba(15, 23, 42, 0.8);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* The New Profile Section Styles */
+        .user-profile-corner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 5px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+            text-align: right;
+            /* Aligns text to the right, next to the icon */
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #f3f4f6;
+        }
+
+        .account-type {
+            font-size: 0.7rem;
+            color: #10b981;
+            /* Nice green for 'Active' status */
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .user-avatar {
+            font-size: 2rem;
+            color: #6366f1;
+            /* Soft purple/blue icon */
+        }
+
+        /* Online Dot Animation */
+        .dot {
+            height: 8px;
+            width: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        /* --- ADD THIS TO HIDE THE DROPDOWN --- */
+        .profile-dropdown-menu {
+            display: none;
+            /* Keeps it hidden until you click */
+            position: absolute;
+            /* Makes it float over the chat */
+            top: 60px;
+            /* Moves it below the header */
+            right: 0;
+            /* Aligns it to the right edge */
+            background: #1e293b;
+            /* Dark background */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            width: 180px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            padding: 8px 0;
+        }
+
+        /* This is the class JavaScript will add/remove */
+        .profile-dropdown-menu.show {
+            display: block !important;
+        }
+
+        .profile-dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            color: #e5e7eb !important;
+            /* Fixes the purple text color */
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+        }
+
+        .profile-dropdown-menu a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
     </style>
 </head>
 
@@ -235,15 +341,34 @@
 
     <div class="main-container">
         <div class="chat-header">
-            <div style="display: flex; align-items: center; gap: 16px;">
+            <div class="header-left">
                 <div class="college-logo"><i class="fas fa-graduation-cap"></i></div>
-                <div>
-                    <h1 style="font-size: 1.4rem;">{{ college.college_name }}</h1>
-                    <p style="color: #9ca3af; font-size: 0.85rem;">AI Assistant • Online</p>
+                <div class="header-text">
+                    <h1>{{ college.college_name }}</h1>
+                    <div class="status-indicator">
+                        <span class="dot"></span>
+                        <span>AI Assistant • Online</span>
+                    </div>
+                </div>
+            </div>
+            <div class="user-profile-corner" onclick="toggleProfileMenu()" style="cursor: pointer; position: relative;">
+                <div class="user-details">
+                    <span class="user-name">{{ session.get('user_name', 'Student') }}</span>
+                    <span class="account-type">Student Portal</span>
+                </div>
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+
+                <div id="profile-dropdown" class="profile-dropdown-menu">
+                    <a href="#"><i class="fas fa-user"></i> My Profile</a>
+                    <a href="#"><i class="fas fa-history"></i> Chat History</a>
+                    <hr style="border-color: rgba(255,255,255,0.1); margin: 5px 0;">
+                    <a href="{{ url_for('logout') }}" style="color: #ef4444;"><i class="fas fa-sign-out-alt"></i>
+                        Logout</a>
                 </div>
             </div>
         </div>
-
         <div class="messages-area" id="messagesArea">
             <div class="bubble">
                 👋 Welcome to <strong>{{ college.college_name }}</strong>! How can I help you today?
@@ -338,6 +463,23 @@
                 textInput.value = chip.textContent.replace(/[^\w\s]/gi, '').trim();
                 handleSendMessage();
             });
+        });
+        function toggleProfileMenu(event) {
+            if (event) event.stopPropagation();
+            const menu = document.getElementById('profile-dropdown');
+            if (menu) {
+                menu.classList.toggle('show');
+            }
+        }
+
+        window.addEventListener('click', function (e) {
+            const menu = document.getElementById('profile-dropdown');
+            const profileCorner = document.querySelector('.user-profile-corner');
+            if (menu && menu.classList.contains('show')) {
+                if (profileCorner && !profileCorner.contains(e.target)) {
+                    menu.classList.remove('show');
+                }
+            }
         });
     </script>
 </body>
