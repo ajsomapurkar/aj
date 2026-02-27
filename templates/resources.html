@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Knowledge Vault | {{ college.college_name }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            color: white;
+            padding: 40px;
+        }
+
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .book-card {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            transition: transform 0.2s;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+            border-color: #6366f1;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .academic {
+            background: #065f46;
+            color: #34d399;
+        }
+
+        .self-growth {
+            background: #3730a3;
+            color: #a5b4fc;
+        }
+
+        h3 {
+            margin: 10px 0;
+            font-size: 1.2rem;
+        }
+
+        .download-btn {
+            display: block;
+            text-align: center;
+            background: #6366f1;
+            color: white;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .back-link {
+            color: #94a3b8;
+            text-decoration: none;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="/college/{{ college.college_id }}/chat" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to Chat
+    </a>
+
+    <div class="header">
+        <h1>The Knowledge Vault</h1>
+        <p>Curated resources for {{ college.college_name }} students.</p>
+    </div>
+
+    <div class="grid">
+        {% for book in resources %}
+        <div class="book-card">
+            <span class="badge {% if book.category == 'Academic' %}academic{% else %}self-growth{% endif %}">
+                {{ book.category }}
+            </span>
+            <h3>{{ book.title }}</h3>
+            <p style="color: #94a3b8; font-size: 13px;">Format: Digital PDF</p>
+            <a href="{{ book.url }}" target="_blank" class="download-btn">
+                <i class="fas fa-download"></i> Access Resource
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+
+</html>

@@ -78,7 +78,12 @@
 </head>
 
 <body>
-    <h1>SaaS Multi-College Management</h1>
+    <header style="margin-bottom: 30px; border-left: 4px solid #10b981; padding-left: 15px;">
+        <h1 style="margin: 0; font-size: 2rem; letter-spacing: -1px;">Multi_college management <span
+                style="color: #10b981;">Universities control
+            </span></h1>
+        <p style="color: #94a3b8; margin-top: 5px;">Managing global college instances & resource libraries</p>
+    </header>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -99,7 +104,7 @@
             <input type="text" name="college_name" placeholder="Display Name (e.g., Ambit College)" required>
             <input type="email" name="college_email" placeholder="Admin email (notifications)" required>
             <input type="text" name="college_pass" placeholder="Set Admin Password for them" required>
-            <button type="submit">Create College Instance</button>
+            <button type="submit">Activate Institutional Hub</button>
         </form>
     </div>
 
@@ -141,6 +146,25 @@
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+    <div class="card">
+        <h2>Inject to Knowledge Vault</h2>
+        <form method="POST" action="/super-admin">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <input type="text" name="resource_title" placeholder="Resource Title (e.g. Atomic Habits)" required>
+
+            <select name="category"
+                style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #334155; background: #0f172a; color: white;">
+                <option value="Academic">Academic (Syllabus/Notes)</option>
+                <option value="Self-Improvement">Self-Improvement</option>
+                <option value="General">General</option>
+            </select>
+
+            <input type="url" name="resource_url" placeholder="Direct PDF or Drive Link" required>
+
+            <button type="submit" style="background: #6366f1;">Push to Global Library</button>
+        </form>
     </div>
 </body>
 

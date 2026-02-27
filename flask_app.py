@@ -34,7 +34,7 @@ def root():
     colleges = list(bot.db.colleges.find())
     return render_template('college_selector.html', colleges=colleges)
 
-# --- 2. STUDENT LOGIN (FIXES YOUR 404) ---
+# --- 2. STUDENT LOGIN ---
 
 
 @app.route('/college/<college_id>/login', methods=['GET', 'POST'])
@@ -64,9 +64,8 @@ def college_login_gate(college_id):
 
 @app.route('/logout')
 def logout():
-    session.clear()  # This wipes the session so the student is officially logged out
+    session.clear()
     flash("Logged out successfully", "success")
-    # Change 'root' to 'index' if your home page function is named index
     return redirect(url_for('root'))
 
 # --- 3. STUDENT REGISTRATION ---
@@ -74,11 +73,7 @@ def logout():
 
 @app.route('/college/<college_id>/register', methods=['GET', 'POST'])
 def college_register(college_id):
-    # Fetch all colleges for the dropdown
     all_colleges = list(bot.db.colleges.find())
-
-    # Fetch the specific college the user is visiting
-    # We name it 'current_college' to fix the UndefinedError
     current_college = bot.db.colleges.find_one({'college_id': college_id})
 
     if request.method == 'POST':
@@ -93,7 +88,6 @@ def college_register(college_id):
         flash("Registration sent! Wait for approval.", "success")
         return redirect(url_for('college_login_gate', college_id=college_id))
 
-    # CRITICAL: We pass current_college here
     return render_template('register.html', current_college=current_college, colleges=all_colleges)
 
 # --- 4. CHAT INTERFACE ---
@@ -104,7 +98,7 @@ def college_chat(college_id):
     college = bot.db.colleges.find_one({'college_id': college_id})
     return render_template('college_chat.html', college=college)
 
-# --- 5. ADMIN PANEL ---
+# --- 5. COLLEGE ADMIN PANEL ---
 
 
 @app.route('/college/<college_id>/admin', methods=['GET', 'POST'])
@@ -125,7 +119,7 @@ def college_admin_panel(college_id):
         {"college_id": college_id, "pending": True}))
     return render_template('college_admin.html', college=college, qa_pairs=qa_pairs, pending_users=pending_users)
 
-# --- 6. ADMIN ACTIONS (APPROVE/REJECT) ---
+# --- 6. ADMIN ACTIONS ---
 
 
 @app.route('/approve/<college_id>/<user_id>', methods=['POST'])
@@ -149,10 +143,8 @@ def reject_user(college_id, user_id):
 @csrf.exempt
 def chat_api(college_id):
     data = request.json
-    # We use .get() to prevent errors if 'message' is missing
     query = data.get('message', '').strip().lower()
 
-    # --- SMALL TALK FILTER ---
     small_talk_responses = {
         "hi": "Hello! Welcome to the campus assistant. How can I help you today?",
         "hello": "Hi there! I'm here to answer your college-related questions.",
@@ -161,47 +153,74 @@ def chat_api(college_id):
         "thank you": "Happy to help! Feel free to ask more questions."
     }
 
-    # If the user's word is in our dictionary, return the answer immediately
     if query in small_talk_responses:
         return jsonify({'response': small_talk_responses[query]})
-    # --- END SMALL TALK FILTER ---
 
-    # If it's NOT small talk, then we run your AI/PDF search logic
     response = bot.get_response(query, college_id)
     return jsonify({'response': response})
 
 
 @app.route('/college/<college_id>/history')
 def college_history(college_id):
-    # 1. Fetch college info for the sidebar and page headers
     college = bot.db.colleges.find_one({'college_id': college_id})
-
     if not college:
         return "College not found", 404
-
-    # 2. Fetch unanswered logs specifically for this college
-    # This pulls from the 'unanswered_logs' collection in your MongoDB
     history = list(bot.db.unanswered_logs.find({"college_id": college_id}))
-
-    # 3. Render the history.html with the data we found
     return render_template('history.html', college=college, history=history)
 
 
 @app.route('/college/<college_id>/faq')
 def college_faq(college_id):
-    # 1. Fetch the college details for the sidebar and header
     college = bot.db.colleges.find_one({'college_id': college_id})
+    if not college:
+        return "College not found", 404
+    faqs = list(bot.db.knowledge_base.find({"college_id": college_id}))
+    return render_template('faq.html', college=college, faqs=faqs)
 
+# --- 8. SUPER ADMIN (MERGED & UNIQUE) ---
+
+
+@app.route('/super-admin', methods=['GET', 'POST'])
+def super_admin():
+    if request.method == 'POST':
+        # Handles College Registration
+        if 'college_id' in request.form:
+            bot.db.colleges.insert_one({
+                "college_id": request.form.get('college_id'),
+                "college_name": request.form.get('college_name'),
+                "college_email": request.form.get('college_email'),
+                "created_at": datetime.utcnow()
+            })
+            flash("New College Registered!", "success")
+
+        # Handles Resource Vault (Injecting Books)
+        elif 'resource_title' in request.form:
+            bot.db.resources.insert_one({
+                "title": request.form.get('resource_title'),
+                "category": request.form.get('category'),
+                "url": request.form.get('resource_url'),
+                "created_at": datetime.utcnow()
+            })
+            flash("Book added to Resource Library!", "success")
+
+        return redirect(url_for('super_admin'))
+
+    colleges = list(bot.db.colleges.find())
+    return render_template('super_admin.html', colleges=colleges)
+
+# --- 9. STUDENT RESOURCE VIEW ---
+
+
+@app.route('/college/<college_id>/resources')
+def resource_library(college_id):
+    college = bot.db.colleges.find_one({'college_id': college_id})
     if not college:
         return "College not found", 404
 
-    # 2. Fetch all Q&A pairs for this specific college
-    # We filter by college_id so students only see their own college's info
-    faqs = list(bot.db.knowledge_base.find({"college_id": college_id}))
-
-    # 3. Render the page with the data
-    return render_template('faq.html', college=college, faqs=faqs)
+    library_books = list(bot.db.resources.find().sort("created_at", -1))
+    return render_template('resources.html', college=college, resources=library_books)
 
 
+# --- 10. APP ENTRY POINT ---
 if __name__ == '__main__':
     app.run(debug=True)

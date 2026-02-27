@@ -362,7 +362,9 @@
 
                 <div id="profile-dropdown" class="profile-dropdown-menu">
                     <a href="#"><i class="fas fa-user"></i> My Profile</a>
-                    <a href="#"><i class="fas fa-history"></i> Chat History</a>
+                    <a href="/college/{{ college.college_id }}/resources">
+                        <i class="fas fa-book-open"></i> Resource Library
+                    </a>
                     <hr style="border-color: rgba(255,255,255,0.1); margin: 5px 0;">
                     <a href="{{ url_for('logout') }}" style="color: #ef4444;"><i class="fas fa-sign-out-alt"></i>
                         Logout</a>
