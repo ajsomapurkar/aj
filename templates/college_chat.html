@@ -2,10 +2,7 @@
 <html lang="en">
 
 <head>
-    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
 
-    <div class="chat-header">
-    </div>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta charset="UTF-8">
@@ -320,32 +317,62 @@
 
         @media (max-width: 600px) {
 
-            /* 1. Make the header a vertical column */
+            /* 1. Hide the sidebar off-screen */
+            .sidebar {
+                position: fixed;
+                left: -100%;
+                /* Move it completely off-screen */
+                top: 0;
+                height: 100vh;
+                z-index: 1000;
+                transition: 0.3s;
+                width: 250px !important;
+                /* Give it full width when it slides in */
+            }
+
+            /* Show sidebar when active */
+            .sidebar.active {
+                left: 0;
+            }
+
+            /* 2. Make main content take 100% width */
+            .main-content {
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+
+            /* 3. Style the new Menu Button */
+            .mobile-menu-btn {
+                display: block !important;
+                position: absolute;
+                top: 15px;
+                left: 15px;
+                background: #6366f1;
+                color: white;
+                border: none;
+                padding: 10px;
+                border-radius: 5px;
+                z-index: 1001;
+            }
+
+            /* 4. Center and Scale the Header Title */
             .chat-header {
-                display: flex !important;
+                padding-top: 60px !important;
+                /* Make room for the menu button */
                 flex-direction: column !important;
-                align-items: center !important;
-                padding-top: 80px !important;
-                /* Extra room for that new button */
-                height: auto !important;
+                text-align: center;
             }
 
-            /* 2. Fix the "Floating" Welcome Bubble */
-            .welcome-bubble {
-                position: static !important;
-                /* This stops it from floating over text */
-                margin: 15px auto !important;
-                width: 90% !important;
-                transform: none !important;
-                font-size: 0.9rem !important;
-                box-shadow: none !important;
-            }
-
-            /* 3. Scale down the title text so it fits 1 line */
             .chat-header h1 {
-                font-size: 1.3rem !important;
-                margin-top: 10px !important;
+                font-size: 1.4rem !important;
+                white-space: normal !important;
+                /* Allow the title to wrap to a 2nd line */
             }
+        }
+
+        /* Hide menu button on Desktop */
+        .mobile-menu-btn {
+            display: none;
         }
     </style>
 </head>
@@ -517,11 +544,6 @@
                 }
             }
         });
-    </script>
-    <script>
-        function toggleSidebar() {
-            document.querySelector('.sidebar').classList.toggle('active');
-        }
     </script>
 </body>
 
