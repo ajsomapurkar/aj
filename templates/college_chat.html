@@ -316,28 +316,48 @@
 
         @media (max-width: 600px) {
 
-            /* 1. Shrink the Sidebar */
+            /* 1. Shrink the sidebar even more */
             .sidebar {
-                width: 60px !important;
-                padding: 10px 5px !important;
+                width: 50px !important;
+                padding: 5px !important;
             }
 
-            /* 2. Hide the text labels so only icons show */
-            .sidebar span,
-            .sidebar h2,
-            .sidebar p {
-                display: none;
-            }
-
-            /* 3. Adjust the main content margin to match the smaller sidebar */
             .main-content {
-                margin-left: 60px !important;
-                padding: 15px !important;
+                margin-left: 50px !important;
             }
 
-            /* 4. Shrink the overlapping header text */
-            header h1 {
-                font-size: 1.1rem !important;
+            /* 2. FIX THE HEADER STACKING */
+            .chat-header {
+                display: flex;
+                flex-direction: column !important;
+                /* Stack items vertically */
+                align-items: center !important;
+                text-align: center;
+                padding: 10px !important;
+                height: auto !important;
+                /* Let the header grow tall */
+            }
+
+            /* 3. Shrink and center the Title */
+            header h1,
+            .chat-header h1 {
+                font-size: 1.2rem !important;
+                margin: 5px 0 !important;
+                width: 100%;
+            }
+
+            /* 4. Move the Welcome Bubble/Badge down */
+            .welcome-bubble,
+            .status-badge {
+                position: relative !important;
+                top: 0 !important;
+                right: 0 !important;
+                margin-top: 5px !important;
+            }
+
+            /* 5. Hide sidebar text to save space */
+            .sidebar span {
+                display: none;
             }
         }
     </style>
